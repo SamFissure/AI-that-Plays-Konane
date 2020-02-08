@@ -1,2 +1,2 @@
 # Konane
-AI that plays Konane.
+A.I. that plays Konane.

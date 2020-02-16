@@ -30,14 +30,20 @@
 		 *
 		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
 		 */
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <string>
+
+using namespace std;
 
 class board {
 	int B = 2;
 	int W = 1;
-	int Dir = 0; 
+	int Dir = 0;
 	int depth;
-	bool color;
-	bool first;
+	int color;
+	int first;
 
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W}
@@ -47,13 +53,13 @@ class board {
 		{B,W,B,W,B,W,B,W}
 		{W,B,W,B,W,B,W,B}
 		{B,W,B,W,B,W,B,W}
-		{W,B,W,B,W,B,W,B}
+		{W,B,W,B,W,B,W,B};
+	}
 public:
 	/*all functions void functions until code is fully determined.*/
-	void whoIsFirst();   //Choose, else chosen.
-	void setAIColor();   //Choose, else chosen.
-	void removePieces(); //Random for now.
-	void setDepth();     //sets depth for sim
+	void setDepth();   //sets depth for sim
+	void setBoard();   //Choose, else chosen.
+	     
 	/*AI Game Playing Functions, in a loop every turn*/
 	void legalMove();   //test for legality of move
 	void makeMove();	//move chosen for recursive call, else chosen for game
@@ -62,22 +68,96 @@ public:
 	void SEF();         //State Evaluation Function, primitive for now, tests number of moves possible for player.
 
 	/*Make a move in-game*/
-	void chosenMove();  //states move chosen, implements... probably unneccessary 
+	void chosenMove();  //states move chosen, implements... probably unneccessary
 }
 
-int main()
-{
-	//full board
-	//rewrite board to ints
 
+}
+int main() {
+
+	int B = 2;
+	int W = 1;
+	int Dir = 0;
+	int depth;
+	bool color;
+	bool first;
+	int p = 0;
+	int i=0;
+	int j = 0;
+	char correct;
+	board board;
+
+	cout << "who is first? \n select 1 for AI and 2 for opponent: ";
+	cin >> board.first;
+	cout << "\n What color is the AI? \n 2 for black and 1 for white:";
+	cin >> board.color;
+	cout << "What pieces will be removed? choose row and column for each.  (manual adjacency test)";
+	while (correct!='y')
+	while (p < 2) {
+		cout << "\n row :";
+		cin >> j;
+		cout << " \n column: ";
+		cin >> i;
+
+		p++;
+		if (i > 7 || i < 0 || j>7 || j < 0)
+		{
+			cout << "invalid choice, restarting selection";
+			p = 0;
+		}
+		else
+		{
+			//board. set board function
+			i = 0;
+			j = 0;
+			cout << "\n row :";
+			cin >> i;
+			cout << " \n column: ";
+			cin >> j;
+
+			p++;
+			if (i > 7 || i < 0 || j>7 || j < 0)
+			{
+				cout << "invalid choice, restarting selection";
+				p = 0;
+			}
+			//board. set board function
+
+		}
+		i = 0;
+		j = 0;
 	}
+	//print board
+	//set correct as user
 
-		
+	for (int i = 0; i < 8; i++){
+
+		for (int j = 0; j < 8; j++) {
+
+			if(board[i][j]>1){
+                cout<<"_B_";
+			}
+            else if(board[i][j]>0){
+                cout<<"_W_";
+			}
+			else{
+                cout<<"_0_";
+			}
+		}
+		cout<<"\n";
+		}
+
+	return 0;
+	*/
+}
+
+
+
 bool legal_move(board, i, j, Dir)
 {
 	if (Dir = N)
 	{
-		i = i - 1; 
+		i = i - 1;
 		state=isFull(board, i, j);
 		if state ==true
 		i = i - 1;

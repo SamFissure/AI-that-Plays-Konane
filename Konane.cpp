@@ -129,7 +129,7 @@ void board::setBoard() {
 	}
 }
 
-	void setDepth();   //sets depth for sim 
+	void setDepth();   //sets depth for sim
 
 	/*AI Game Playing Functions, in a loop every turn*/
 	void legalMove();   //test for legality of move
@@ -140,10 +140,10 @@ void board::setBoard() {
 
 	/*Make a move in-game*/
 	void chosenMove();  //states move chosen, implements... probably unneccessary
-}
 
 
-}
+
+
 int main() {
 
 	int B = 2;
@@ -161,9 +161,17 @@ int main() {
 	board.setFirst();
 	board.setColor();
 	board.setBoard();
-	//print board
-	//set correct as user
-
+	board.display();
+	if (board.getFirst = 1)
+	{
+		//generate tree
+		//move
+		//move order is set in class.
+	}
+	else
+	{
+		//take input and wait.
+	}
 	return 0;
 }
 
@@ -177,7 +185,45 @@ bool legal_move(board, i, j, Dir)
 		state=isFull(board, i, j);
 		if state ==true
 		i = i - 1;
-
+		state=isFull(board, i, j);
+		if state == false
+    //move is legal
+			//make move? or not.
+	}
+	if (Dir = S)
+	{
+		i = i + 1;
+		state = isFull(board, i, j);
+		if state == true
+			i = i + 1;
+		state = isFull(board, i, j);
+		if state == false
+			//move is legal
+					//make move? or not.
+	}
+}
+if (Dir = E)
+{
+	j = j - 1;
+	state = isFull(board, i, j);
+	if state == true
+		j = j - 1;
+	state = isFull(board, i, j);
+	if state == false
+		//move is legal
+				//make move? or not.
+}
+if (Dir = W)
+{
+	j = j + 1;
+	state = isFull(board, i, j);
+	if state == true
+		j = j + 1;
+	state = isFull(board, i, j);
+	if state == false
+		//move is legal
+				//make move? or not.
+}
 
 bool isFull(board, i, j)
 {
@@ -189,5 +235,3 @@ bool isFull(board, i, j)
 		return true;
 	}
 }
-
-

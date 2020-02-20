@@ -5,58 +5,68 @@ then backtracking until a path that has not been explored is found. Once the alg
 leaf node, which indicates a terminal state, or reaches the specified search depth in the game tree
 the utility(best/worst) value of the node is returned. 
 */
-int minimax(struct node *head ,int level,int depth)
+
+int minimax(int board ,int level,int depth)
 {
 	// if node is at depth limit...
         if (level == depth)
            // do a static evaluation, return result and the best move
             return (static_eval(node));  //Have to write the static_eval function
 
-       // generate successor nodes
-        successor_nodes = generate_successor_nodes(board, node); //Have to write the generate_successor_nodes function
+      
 
         //if node is at a maximizing level (if level is even)
         if (level % 2 == 0)
         {
-            best_move = ()
-            double value = -99999;
+            
+            int best_value = -99999;
           
+            for(int i=0;i<8;i++)
+            {
+            	for(int j=0;j<8;j++)
+            	{
+            		if(board[i][j]==0 and legal_move(board,i,j,0))
+            		{
+            			// Make the move 
+            			board[i][j]=B; //assuming black is the AI and its' trying to maximize
 
-            // for each successor node, call minimax recursively
-            while(successor_nodes)
-           {
-                rval = minimax(successor);
-
-                //look for the highest bv
-                if (rval[0] > value){
-                    value = rval[0];
-                    best_move = successor_move;   
-                }
+            			// Call minimax recursively and choose 
+                    	// the maximum value 
+                    	best = max( best_value, minimax(board, level+1,depth) ); 
+  
+                    	// Undo the move 
+                   		 board[i][j] = 0; 
+            		}
+            	}
             }
-
-            return (value);
+            return best_value;
         }
 
-        //if node is at a minimizing level (if level is odd)
+
+
         else
         {
-            best_move = ()
-            double value = 99999;
+           
+            int best_value = 99999;
+			for(int i=0;i<8;i++)
+            {
+            	for(int j=0;j<8;j++)
+            	{
+            		if(board[i][j]==0 and legal_move(board,i,j,0))
+            		{
+            			// Make the move 
+            			board[i][j]=W; //assuming white is the opponent and its' trying to minimize
 
-            // for each successor node, call minimax recursively
-           while(successor_nodes)
-           {
-                rval = minimax(successor)
-
-                // look for the lowest bv
-                if (rval[0] < value){
-                    value = rval[0];
-                    best_move = successor_move;
-                }
+            			// Call minimax recursively and choose 
+                    	// the minimum value 
+                    	best = min( best_value, minimax(board, level+1,depth) ); 
+  
+                    	// Undo the move 
+                   		 board[i][j] = 0; 
+            		}
+            	}
             }
-
-
-            return (value)
+            return best_value;
         }
     
 }

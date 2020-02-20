@@ -63,6 +63,8 @@ public:
 	int getColor();
 	void display();
 	void setBoard();
+	bool isFull(i, j);
+	bool legal_move(i, j, Dir);
 };
 void board::setFirst() {
 	cout << "who is first? \n select 1 for AI and 2 for opponent: ";
@@ -129,10 +131,82 @@ void board::setBoard() {
 	}
 }
 
+bool board::isFull(i,j) {
+	if (board[i][j] = 0)
+	{
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+bool board::legal_move(i, j, Dir)
+{
+	if (Dir = N)
+	{
+		if (i > 1) {
+			i = i - 1;
+			state = board.isFull(i, j);
+			if (state == true) {
+				i = i - 1;
+			}
+			state = board.isFull(i, j);
+			if (state == false) {
+				//move is legal
+				//make move? or not.
+			}
+		}
+	}
+	if (Dir = S)
+		if (i < 5) {
+			{
+				i = i + 1;
+				state = isFull(i, j);
+				if (state == true) {
+					i = i + 1;
+				}
+				state = isFull(i, j);
+				if (state == false) {
+					//move is legal
+					//make move? or not.
+				}
+			}
+		}
+	if (Dir = E)
+	{
+		if (j > 1) {
+			j = j - 1;
+			state = board.isFull(i, j);
+			if (state == true) {
+				j = j - 1;
+			}
+			state = board.isFull(i, j);
+			if (state == false) {
+				//move is legal
+				//make move? or not.
+			}
+		}
+	}			//make move? or not.
+	}
+	if (Dir = W)
+	{
+		j = j + 1;
+		state = isFull(board, i, j);
+		if state == true
+			j = j + 1;
+		state = isFull(board, i, j);
+		if state == false
+			//move is legal
+					//make move? or not.
+	}
+}
+
+
 	void setDepth();   //sets depth for sim
 
 	/*AI Game Playing Functions, in a loop every turn*/
-	void legalMove();   //test for legality of move
+	void legalMove();  //test for legality of move
 	void makeMove();	//move chosen for recursive call, else chosen for game
 	void ABmax();		//maximizer for AI sim, may want it to be separate from this class?
 	void ABmin();       //minimizer for AI sim, may want it to be separate from this class?
@@ -177,61 +251,5 @@ int main() {
 
 
 
-bool legal_move(board, i, j, Dir)
-{
-	if (Dir = N)
-	{
-		i = i - 1;
-		state=isFull(board, i, j);
-		if state ==true
-		i = i - 1;
-		state=isFull(board, i, j);
-		if state == false
-    //move is legal
-			//make move? or not.
-	}
-	if (Dir = S)
-	{
-		i = i + 1;
-		state = isFull(board, i, j);
-		if state == true
-			i = i + 1;
-		state = isFull(board, i, j);
-		if state == false
-			//move is legal
-					//make move? or not.
-	}
-}
-if (Dir = E)
-{
-	j = j - 1;
-	state = isFull(board, i, j);
-	if state == true
-		j = j - 1;
-	state = isFull(board, i, j);
-	if state == false
-		//move is legal
-				//make move? or not.
-}
-if (Dir = W)
-{
-	j = j + 1;
-	state = isFull(board, i, j);
-	if state == true
-		j = j + 1;
-	state = isFull(board, i, j);
-	if state == false
-		//move is legal
-				//make move? or not.
-}
 
-bool isFull(board, i, j)
-{
-	if (board[i][j] = 0)
-	{
-		return false;
-	}
-	else {
-		return true;
-	}
-}
+

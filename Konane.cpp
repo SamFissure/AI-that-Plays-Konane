@@ -63,10 +63,10 @@ public:
 	int getColor();
 	void display();
 	void setBoard();
-	bool isFull(i, j);
-	bool legal_move(i, j, Dir);
-	void makeMove(i, j, Dir);
-	int calibrate(i, color);
+	bool isFull(int i, int j);
+	bool legal_move(int i, int j, int Dir);
+	void makeMove(int i, int j, int Dir);
+	int calibrate(int i, int color);
 };
 void board::setFirst() {
 	cout << "who is first? \n select 1 for AI and 2 for opponent: ";
@@ -150,62 +150,63 @@ bool board::isFull(i,j) {
 
 bool board::legal_move(i, j, Dir)
 {
+	k = i;
+	m = j;
+
 	if (Dir = 0) //N
 	{
 		if (i > 1) {
-			i = i - 1;
-			state = isFull(i, j);
+			k--;
+			state = isFull(k, m);
 			if (state == true) {
-				i = i - 1;
+				k--;
 			}
-			state = isFull(i, j);
+			state = isFull(k, m);
 			if (state == false) {
-				//move is legal
-				//make move? or not.
+				return true;
 			}
 		}
 	}
 	if (Dir = 1) //S
 		if (i < 5) {
 			{
-				i = i + 1;
-				state = isFull(i, j);
+				k++;
+				state = isFull(k, m);
 				if (state == true) {
-					i = i + 1;
+					k++;
 				}
-				state = isFull(i, j);
+				state = isFull(k, m);
 				if (state == false) {
-					//move is legal
-					//make move? or not.
+					return true;
 				}
 			}
 		}
 	if (Dir = 2)  //W
 	{
 		if (j > 1) {
-			j = j - 1;
-			state = isFull(i, j);
+			m--;
+			state = isFull(k, m);
 			if (state == true) {
-				j = j - 1;
+				m--;
 			}
-			state = isFull(i, j);
+			state = isFull(k, m);
 			if (state == false) {
-				//move is legal
-				//make move? or not.
+				return true;
 			}
 		}
 	}			//make move? or not.
 
 	if (Dir = 3) //E
 	{
-		j = j + 1;
-		state = isFull(i, j);
-		if state == true
-			j = j + 1;
-		state = isFull(i, j);
-		if state == false
-			//move is legal
-					//make move? or not.
+		m++;
+		state = isFull(k, m);
+		if (state == true) {
+			m++;
+		}
+		state = isFull(k, m);
+		if (state == false) {
+			return true;
+		}
 	}
 }
 
@@ -280,8 +281,3 @@ int main() {
 	}
 	return 0;
 }
-
-
-
-
-

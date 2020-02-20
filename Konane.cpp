@@ -65,6 +65,8 @@ public:
 	void setBoard();
 	bool isFull(i, j);
 	bool legal_move(i, j, Dir);
+	void makeMove(i, j, Dir);
+	int calibrate(i, color);
 };
 void board::setFirst() {
 	cout << "who is first? \n select 1 for AI and 2 for opponent: ";
@@ -73,6 +75,11 @@ void board::setFirst() {
 void board::setColor() {
 	cout << "\n What color is the AI? \n 1 for white and 2 for black:";
 	cin >> color;
+}
+int board::calibrate(i, color)
+{
+	if (color == 2) { return i % 2; }
+	else { return (i + 1) % 2; }
 }
 int board::getFirst() { return first; }
 int board::getColor() { return color; }
@@ -143,22 +150,22 @@ bool board::isFull(i,j) {
 
 bool board::legal_move(i, j, Dir)
 {
-	if (Dir = N)
+	if (Dir = 0) //N
 	{
 		if (i > 1) {
 			i = i - 1;
-			state = board.isFull(i, j);
+			state = isFull(i, j);
 			if (state == true) {
 				i = i - 1;
 			}
-			state = board.isFull(i, j);
+			state = isFull(i, j);
 			if (state == false) {
 				//move is legal
 				//make move? or not.
 			}
 		}
 	}
-	if (Dir = S)
+	if (Dir = 1) //S
 		if (i < 5) {
 			{
 				i = i + 1;
@@ -173,35 +180,60 @@ bool board::legal_move(i, j, Dir)
 				}
 			}
 		}
-	if (Dir = E)
+	if (Dir = 2)  //W
 	{
 		if (j > 1) {
 			j = j - 1;
-			state = board.isFull(i, j);
+			state = isFull(i, j);
 			if (state == true) {
 				j = j - 1;
 			}
-			state = board.isFull(i, j);
+			state = isFull(i, j);
 			if (state == false) {
 				//move is legal
 				//make move? or not.
 			}
 		}
 	}			//make move? or not.
-	}
-	if (Dir = W)
+
+	if (Dir = 3) //E
 	{
 		j = j + 1;
-		state = isFull(board, i, j);
+		state = isFull(i, j);
 		if state == true
 			j = j + 1;
-		state = isFull(board, i, j);
+		state = isFull(i, j);
 		if state == false
 			//move is legal
 					//make move? or not.
 	}
 }
 
+void board::makeMove(i, j, Dir, color) {
+	
+	0 = board[i][j];
+
+	if (i > 1 && Dir == 0)
+	{
+		board[i - 1][j] = 0;
+		board[i - 2][j] = color;
+	}
+	if (i < 6 && Dir == 1)
+	{
+		board[i + 1][j] = 0;
+		board[i + 2][j] = color;
+	}
+	if (j > 1 && Dir == 2)
+	{
+		board[j - 1][j] = 0;
+		board[j - 2][j] = 2;
+	}
+	if (j < 6 && Dir == 3)
+	{
+		board[j + 1][j] = 0;
+		board[j + 2][j] = 2;
+	}
+}
 
 	void setDepth();   //sets depth for sim
 

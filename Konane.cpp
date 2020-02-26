@@ -99,8 +99,7 @@ int board::minimax(board int level,int depth)
             		if(board[i][j]==0)
             		{
             		    for(int Dir=0;Dir<4;Dir++){
-            			legal_move(board,i,j,Dir);
-            			// Make the move
+            			if(legal_move(i,j,Dir)){
             			board[i][j]=B; //assuming black is the AI and its' trying to maximize
 
             			// Call minimax recursively and choose
@@ -109,7 +108,10 @@ int board::minimax(board int level,int depth)
 
                     	// Undo the move
                    		 board[i][j] = 0;
-            		    }
+            			}
+
+            			}
+
             		}
             	}
             }
@@ -126,24 +128,27 @@ int board::minimax(board int level,int depth)
             {
             	for(int j=0;j<8;j++)
             	{
-            		if(board[i][j]==0 and legal_move(board,i,j,0))
+            		if(board[i][j]==0)
             		{
-            			// Make the move
-            			board[i][j]=W; //assuming white is the opponent and its' trying to minimize
+            		    for(int Dir=0;Dir<4;Dir++){
+                            if(legal_move(i,j,Dir)){
+                                board[i][j]=B; //assuming black is the AI and its' trying to maximize
 
             			// Call minimax recursively and choose
-                    	// the minimum value
-                    	best = min( best_value, minimax(board, level+1,depth) );
+                    	// the maximum value
+                                best = max(best_value, minimax(board, level+1,depth) );
 
                     	// Undo the move
-                   		 board[i][j] = 0;
-            		}
+                                board[i][j] = 0;
+                            }
+
+            		    }
             	}
             }
+            }
+        }
             return best_value;
         }
-
-}
 void board::setFirst() {
 	cout << "who is first? \n select 1 for AI and 2 for opponent: ";
 	cin >> first;

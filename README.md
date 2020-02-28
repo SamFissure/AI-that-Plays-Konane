@@ -1,4 +1,5 @@
-# Konane Made by Tafroze and Sam (Robert).
+# Konane AI 
+# Made by Tafroze and Sam (Robert).
 A.I. that plays Konane.
 
 Significant contributions by both 

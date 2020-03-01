@@ -36,119 +36,131 @@
 #include <string>
 
 using namespace std;
+/*TODO .h file for the class*/
+static const int MAX = 999;
+static const int MIN = -999;
+static const int LOSE = -199;
+static const int WIN = 199;
 
+
+int depth;
+int color;
+int playercolor;
+int first;
+
+/*int getFirst{return first;}
+int getColor {return color;}
+int getPlayerColor {return playerColor;}
+int getDepth {return depth;}*/
 class board {
 	int B = 2;
 	int W = 1;
+	int X = 0;
 	int Dir = 0;
-	int depth;
-	int color;
-	int first;
 
+	/*TODO set this in set color*/
+
+	/*set the Static ints before compile,
+	fine tune as needed with each compile*/
+
+
+	int bestmove[4];
+	char AtoH[8] = { 'A','B','C','D','E','F','G','H' };
 	int board[8][8] = {
-		{B,W,B,W,B,W,B,W}
+		{B,W,B,W,B,W,B,W},
+		{W,B,W,B,W,B,W,B},
+		{B,W,B,W,B,W,B,W},
+		{W,B,W,B,W,B,W,B},
+		{B,W,B,W,B,W,B,W},
+		{W,B,W,B,W,B,W,B},
+		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B}
-		{B,W,B,W,B,W,B,W}
-		{W,B,W,B,W,B,W,B}
-		{B,W,B,W,B,W,B,W}
-		{W,B,W,B,W,B,W,B}
-		{B,W,B,W,B,W,B,W}
-		{W,B,W,B,W,B,W,B};
-	}
+		};
 public:
 	/*all functions void functions until code is fully determined.*/
+
+	/*SETTERS*/
 	void setFirst();
-	int getFirst();
 	void setColor();
-	int getColor();
+
+	/*INLINE GETTERS*/
+    //MAKE GLOBAL???
+
 	void display();
-	void setBoard();
+	void manualOverrideR(); //piece removal, for fixing board errors and for setup.
 	bool isFull(int i, int j);
+	//test for legality of move
 	bool legal_move(int i, int j, int Dir);
-	void makeMove(int i, int j, int Dir);
+	void makeMove(int i, int j, int Dir, int Pcolor);
 	int calibrate(int i, int color);
+    int alphaBetaMinimax(int alpha, int beta, int level, int depth);
+    int static_eval();
+	/*
 	int minimax(int level,int depth);
+	/*TODO make below functions
+	manualOverride
+
+	*/
+
 };
-/*
-The minimax algorithm begins at the current state of the game recursively searching the
-game tree for the optimal move depth-first, which means exploring a branch as far as it goes and
-then backtracking until a path that has not been explored is found. Once the algorithm reaches a
-leaf node, which indicates a terminal state, or reaches the specified search depth in the game tree
-the utility(best/worst) value of the node is returned.
-*/
-
-int board::minimax(board int level,int depth)
-{
-	// if node is at depth limit...
-        if (level == depth)
-           // do a static evaluation, return result and the best move
-            return (static_eval(node));  //Have to write the static_eval function
 
 
+void board::manualOverrideR() {
+	int p = 0;
+	int i, j;
+	char ans;
+	cout << "What pieces will be removed? choose row and column for each.  (manual adjacency test)";
+	while (ans != 'n') {
 
-        //if node is at a maximizing level (if level is even)
-        if (level % 2 == 0)
-        {
+		cout << "\n \n column (A-B = 1-8): ";
+		cin >> j;
 
-            int best_value = -99999;
+		cout << "\n row (1-8): ";
+		cin >> i;
+        i--;
+        j--;
+		if (i > 7 || i < 0 || j>7 || j < 0) {
+			cout << "invalid choice, restarting selection";
+		}
 
-            for(int i=0;i<8;i++)
-            {
-            	for(int j=0;j<8;j++)
-            	{
-            		if(board[i][j]==0)
-            		{
-            		    for(int Dir=0;Dir<4;Dir++){
-            			if(legal_move(i,j,Dir)){
-            			board[i][j]=B; //assuming black is the AI and its' trying to maximize
+		else {
+            board [i][j]=X;
+		}
 
-            			// Call minimax recursively and choose
-                    	// the maximum value
-                    	best = max( best_value, minimax(board, level+1,depth) );
+		cout << "\n are there more pieces to be removed? ";
+		cin >> ans;
+	}
+}
 
-                    	// Undo the move
-                   		 board[i][j] = 0;
-            			}
-
-            			}
-
-            		}
-            	}
-            }
-            return best_value;
-        }
-
+/*TODO Some issues with this function, requires some surgery
+I feel TERRIBLE saying this, but it likely requires MORE break statements..
+and the return is in the wrong place I think...
+I have to write some yucky code (Break statements should be sparse in good code)*/
 
 
-        else
-        {
+int board::static_eval() {
+int count = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (board[i][j] > 0)
+			{
 
-            int best_value = 99999;
-			for(int i=0;i<8;i++)
-            {
-            	for(int j=0;j<8;j++)
-            	{
-            		if(board[i][j]==0)
-            		{
-            		    for(int Dir=0;Dir<4;Dir++){
-                            if(legal_move(i,j,Dir)){
-                                board[i][j]=B; //assuming black is the AI and its' trying to maximize
+				for (int Dir = 0; Dir < 4; Dir++) {
+					if (legal_move(i, j, Dir)) {
+						count++;
+					}
 
-            			// Call minimax recursively and choose
-                    	// the maximum value
-                                best = max(best_value, minimax(board, level+1,depth) );
+				}
 
-                    	// Undo the move
-                                board[i][j] = 0;
-                            }
+			}
+			return count;
+		}
+	}
+}
 
-            		    }
-            	}
-            }
-            }
-        }
-            return best_value;
-        }
+
 void board::setFirst() {
 	cout << "who is first? \n select 1 for AI and 2 for opponent: ";
 	cin >> first;
@@ -157,83 +169,69 @@ void board::setColor() {
 	cout << "\n What color is the AI? \n 1 for white and 2 for black:";
 	cin >> color;
 }
-int board::calibrate(i, color)
+/*MAY NOT BE NEEDED*/
+
+bool board::isFull(int i, int j) {
+
+	if (board[i][j] = 0)
+
+	{
+
+		return false;
+
+	}
+
+	else {
+
+		return true;
+
+	}
+
+}
+int board::calibrate(int i, int color)
 {
 	if (color == 2) { return i % 2; }
 	else { return (i + 1) % 2; }
 }
-int board::getFirst() { return first; }
-int board::getColor() { return color; }
+
 void board::display() {
+    cout<< "X= Black, O = White, Spaces for empty \n\n";
+	cout << "   ";
+	int row = 0;
+	for (int i = 0; i < 8; i++){
+		cout << AtoH[i];
+		cout << " ";
+	}
+	cout<< "\n \n";
 	for (int i = 0; i < 8; i++) {
+        cout <<++row <<"  ";
+
 		for (int j = 0; j < 8; j++) {
+
+
 			if (board[i][j] > 1) {
-				cout << "B_";
+				cout << "X ";
 			}
 			else if (board[i][j] > 0) {
-				cout << "W_";
+				cout << "0 ";
 			}
 			else {
-				cout << "0_";
+				cout << "  ";
 			}
 		}
 		cout << "\n";
 	}
 }
 
-void board::setBoard() {
-	int p = 0;
-	int i, j;
-	cout << "What pieces will be removed? choose row and column for each.  (manual adjacency test)";
-	while (p < 2) {
-		cout << "\n row :";
-		cin >> j;
-		cout << " \n column: ";
-		cin >> i;
 
-		p++;
-		if (i > 7 || i < 0 || j>7 || j < 0)
-		{
-			cout << "invalid choice, restarting selection";
-			p = 0;
-		}
-		else
-		{
-			i = 0;
-			j = 0;
-			cout << "\n row :";
-			cin >> i;
-			cout << " \n column: ";
-			cin >> j;
 
-			p++;
-			if (i > 7 || i < 0 || j>7 || j < 0)
-			{
-				cout << "invalid choice, restarting selection";
-				p = 0;
-			}
 
-		}
-		i = 0;
-		j = 0;
-	}
-}
 
-bool board::isFull(i,j) {
-	if (board[i][j] = 0)
-	{
-		return false;
-	}
-	else {
-		return true;
-	}
-}
-
-bool board::legal_move(i, j, Dir)
+bool board::legal_move(int i, int j, int Dir)
 {
-	k = i;
-	m = j;
-
+    int k = i;
+	int m = j;
+    bool state;
 	if (Dir = 0) //N
 	{
 		if (i > 1) {
@@ -275,7 +273,7 @@ bool board::legal_move(i, j, Dir)
 				return true;
 			}
 		}
-	}			//make move? or not.
+	}
 
 	if (Dir = 3) //E
 	{
@@ -289,47 +287,126 @@ bool board::legal_move(i, j, Dir)
 			return true;
 		}
 	}
+	//make move? or not.
 }
 
-void board::makeMove(i, j, Dir, color) {
+void board::makeMove(int i, int j, int Dir, int Pcolor) {
 
-	0 = board[i][j];
+	board[i][j] = 0 ;
 
 	if (i > 1 && Dir == 0)
 	{
 		board[i - 1][j] = 0;
-		board[i - 2][j] = color;
+		board[i - 2][j] = Pcolor;
 	}
 	if (i < 6 && Dir == 1)
 	{
 		board[i + 1][j] = 0;
-		board[i + 2][j] = color;
+		board[i + 2][j] = Pcolor;
 	}
 	if (j > 1 && Dir == 2)
 	{
 		board[j - 1][j] = 0;
-		board[j - 2][j] = 2;
+		board[j - 2][j] = Pcolor;
 	}
 	if (j < 6 && Dir == 3)
 	{
 		board[j + 1][j] = 0;
-		board[j + 2][j] = 2;
+		board[j + 2][j] = Pcolor;
 	}
 }
 
-	void setDepth();   //sets depth for sim
 
-	/*AI Game Playing Functions, in a loop every turn*/
-	void legalMove();  //test for legality of move
-	void makeMove();	//move chosen for recursive call, else chosen for game
+	void setDepth();   //sets depth for sim
+	/*possible TODOs*/
+	/*AI Game Playing Functions, in a loop every turn
 	void ABmax();		//maximizer for AI sim, may want it to be separate from this class?
 	void ABmin();       //minimizer for AI sim, may want it to be separate from this class?
-	void SEF();         //State Evaluation Function, primitive for now, tests number of moves possible for player.
 
-	/*Make a move in-game*/
-	void chosenMove();  //states move chosen, implements... probably unneccessary
+	Make a move in-game
+	void chosenMove();  //states move chosen, implements... probably unneccessary*/
+
+	/*
+The minimax algorithm begins at the current state of the game recursively searching the
+game tree for the optimal move depth-first, which means exploring a branch as far as it goes and
+then backtracking until a path that has not been explored is found. Once the algorithm reaches a
+leaf node, which indicates a terminal state, or reaches the specified search depth in the game tree
+the utility(best/worst) value of the node is returned.
+*/
+
+/* int board::minimax(int level,int depth)
+{
+	// if node is at depth limit...
+		if (level == depth)
+		   // do a static evaluation, return result and the best move
+			return (static_eval(node));  //Have to write the static_eval function
 
 
+
+		//if node is at a maximizing level (if level is even)
+		if (level % 2 == 0)
+		{
+
+			int best_value = -99999;
+
+			for(int i=0;i<8;i++)
+			{
+				for(int j=0;j<8;j++)
+				{
+					if(board[i][j]==0)
+					{
+						for(int Dir=0;Dir<4;Dir++){
+						if(legal_move(i,j,Dir)){
+						board[i][j]=B; //assuming black is the AI and its' trying to maximize
+
+						// Call minimax recursively and choose
+						// the maximum value
+						best = max( best_value, minimax(level+1,depth) );
+
+						// Undo the move
+						// board[i][j] = 0;
+						}
+
+						}
+
+					}
+				}
+			}
+			return best_value;
+		}
+
+
+
+		else
+		{
+
+			int best_value = 99999;
+			for(int i=0;i<8;i++)
+			{
+				for(int j=0;j<8;j++)
+				{
+					if(board[i][j]==0)
+					{
+						for(int Dir=0;Dir<4;Dir++){
+							if(legal_move(i,j,Dir)){
+								board[i][j]=B; //assuming black is the AI and its' trying to maximize
+
+						// Call minimax recursively and choose
+						// the maximum value
+								best = max(best_value, minimax(board, level+1,depth) );
+
+						// Undo the move
+						 //       board[i][j] = 0;
+							}
+
+						}
+				}
+			}
+			}
+		}
+			return best_value;
+		}
+		*/
 
 
 int main() {
@@ -337,7 +414,6 @@ int main() {
 	int B = 2;
 	int W = 1;
 	int Dir = 0;
-	int depth;
 	bool color;
 	bool first;
 	int p = 0;
@@ -348,9 +424,11 @@ int main() {
 
 	board.setFirst();
 	board.setColor();
-	board.setBoard();
 	board.display();
-	if (board.getFirst = 1)
+	board.manualOverrideR();
+	cout << "\n is board correct? \n \n";
+	board.display();
+/*	if (board.getFirst = 1)
 	{
 		//generate tree
 		//move
@@ -359,6 +437,6 @@ int main() {
 	else
 	{
 		//take input and wait.
-	}
+	}*/
 	return 0;
 }

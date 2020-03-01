@@ -6,7 +6,7 @@ leaf node, which indicates a terminal state, or reaches the specified search dep
 the utility(best/worst) value of the node is returned.
 */
 
-int board::minimax(board int level,int depth)
+int board::minimax(int level,int depth)
 {
 	// if node is at depth limit...
         if (level == depth)
@@ -33,7 +33,7 @@ int board::minimax(board int level,int depth)
 
             			// Call minimax recursively and choose
                     	// the maximum value
-                    	best = max( best_value, minimax(board, level+1,depth) );
+                    	best = max( best_value, minimax(, level+1,depth) );
 
                     	// Undo the move
                    		 board[i][j] = 0;
@@ -79,87 +79,80 @@ int board::minimax(board int level,int depth)
             return best_value;
         }
 
- 
 
-int board::alphaBetaMinimax( int alpha,  
-            int beta, int level, int depth) 
+
+int board::alphaBetaMinimax( int alpha,
+            int beta, int level, int depth)
 {
-
-
-// Initial values of 
-// Aplha and Beta 
-const int MAX = 9999; 
-const int MIN = -9999; 
-  
-
-      
-    // Terminating condition. i.e  
-    // leaf node is reached 
-    if (level == depth) 
+// Initial values of
+// Aplha and Beta
+// Terminating condition. i.e
+// leaf node is reached
+    if (level == depth)
         return board.static_eval(board); //Need to fix the board
-  
+
      if (level % 2 == 0)
-    { 
-        int best = MIN; 
-  
+    {
+        int best = MIN;
+
         for(int i=0;i<8;i++)
             {
             	for(int j=0;j<8;j++)
             	{
             		if(board[i][j]>0)
             		{
-              
-            			int val = minimax(alpha, beta, level+1,depth); 
-            			best = max(best, val); 
-           				alpha = max(alpha, best); 
-  
-            			// Alpha Beta Pruning 
-            			if (beta <= alpha) 
-                		break; 
-        			} 
-        		return best; 
-    			} 
+
+            			int val = minimax(alpha, beta, level+1,depth);
+            			best = max(best, val);
+           				alpha = max(alpha, best);
+
+            			// Alpha Beta Pruning
+            			if (beta <= alpha)
+                		break;
+        			}
+        		return best;
+    			}
     		}
     }
     else
-    { 
-        int best = MAX; 
-  
-       
+    {
+        int best = MAX;
+
+
         for(int i=0;i<8;i++)
             {
             	for(int j=0;j<8;j++)
             	{
             		if(board[i][j]>0)
             		{
-              
-            			int val = minimax(alpha, beta, level+1,depth); 
-            			best = min(best, val); 
-            			beta = min(beta, best); 
-  
-            			// Alpha Beta Pruning 
-            			if (beta <= alpha) 
-                			break; 
-        		} 
-        		return best; 
-   		} 
-	   } 
+
+            			int val = minimax(alpha, beta, level+1,depth);
+            			best = min(best, val);
+            			beta = min(beta, best);
+
+            			// Alpha Beta Pruning
+            			if (beta <= alpha)
+                			break;
+        		}
+        		return best;
+   		}
+	   }
 	}
 
 }
 
 int board::static_eval() {
-	
+
             for(int i=0;i<8;i++)
             {
             	for(int j=0;j<8;j++)
             	{
             		if(board[i][j]>0)
-            		{	
+            		{
             			int count=0;
             		    for(int Dir=0;Dir<4;Dir++){
             				if(legal_move(i,j,Dir)){
-            					count++; 
+            					count++;
 							}
 
             			}

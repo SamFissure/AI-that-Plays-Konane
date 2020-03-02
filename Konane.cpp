@@ -36,7 +36,7 @@
 #include <string>
 
 using namespace std;
-/*TODO .h file for the class*/
+/*TODO .h file for the class???*/
 static const int MAX = 999;
 static const int MIN = -999;
 static const int LOSE = -199;
@@ -45,8 +45,8 @@ static const int WIN = 199;
 
 int depth;
 int color;
-int playercolor;
-int first;
+int humanColor;
+bool first=true;
 
 /*int getFirst{return first;}
 int getColor {return color;}
@@ -57,7 +57,7 @@ class board {
 	int W = 1;
 	int X = 0;
 	int Dir = 0;
-
+	int drti = 0;
 	/*TODO set this in set color*/
 
 	/*set the Static ints before compile,
@@ -83,18 +83,16 @@ public:
 	void setFirst();
 	void setColor();
 
-	/*INLINE GETTERS*/
-    //MAKE GLOBAL???
-
 	void display();
-	void manualOverrideR(); //piece removal, for fixing board errors and for setup.
+	void manualOverride(); //piece removal, for fixing board errors and for setup.
 	bool isFull(int i, int j);
 	//test for legality of move
 	bool legal_move(int i, int j, int Dir);
-	void makeMove(int i, int j, int Dir, int Pcolor);
+	void makeMove(int i, int j, int Dir, int playerColor);
 	int calibrate(int i, int color);
     int alphaBetaMinimax(int alpha, int beta, int level, int depth);
     int static_eval();
+	void selection(int S);
 	/*
 	int minimax(int level,int depth);
 	/*TODO make below functions
@@ -104,98 +102,129 @@ public:
 
 };
 
+void board::selection(int S) {
+	int z = S;
+	int i, j;
+	cout << "\n \n column (A-B = 1-8): ";
+	cin >> j;
+	cout << "\n row (1-8): ";
+	cin >> i;
+	i--;
+	j--;
+	if (i > 7 || i < 0 || j>7 || j < 0) {
+		cout << "\n invalid choice, restarting selection";
+	}
 
-void board::manualOverrideR() {
+	else {
+		board[i][j] = z;
+	}
+}
+
+void board::manualOverride() {
 	int p = 0;
 	int i, j;
-	char ans;
-	cout << "What pieces will be removed? choose row and column for each.  (manual adjacency test)";
-	while (ans != 'n') {
-
-		cout << "\n \n column (A-B = 1-8): ";
-		cin >> j;
-
-		cout << "\n row (1-8): ";
-		cin >> i;
-        i--;
-        j--;
-		if (i > 7 || i < 0 || j>7 || j < 0) {
-			cout << "invalid choice, restarting selection";
-		}
-
-		else {
-            board [i][j]=X;
-		}
-
-		cout << "\n are there more pieces to be removed? ";
-		cin >> ans;
-	}
-}
-
-/*TODO Some issues with this function, requires some surgery
-I feel TERRIBLE saying this, but it likely requires MORE break statements..
-and the return is in the wrong place I think...
-I have to write some yucky code (Break statements should be sparse in good code)*/
-
-
-int board::static_eval() {
-int count = 0;
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			if (board[i][j] > 0)
+	char ans, ans2, remadd;
+	display();
+	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+	cin >> remadd;
+		while (remadd != 'e') {
+			if (remadd == 'e'){}
+			else if (remadd == 'r')
 			{
-
-				for (int Dir = 0; Dir < 4; Dir++) {
-					if (legal_move(i, j, Dir)) {
-						count++;
-					}
-
-				}
-
+				cout << "What pieces will be removed? choose row and column for each.  (manual adjacency test)";
+				selection(0);
 			}
-			return count;
-		}
+			else if (remadd == 'b')
+			{
+				cout << "What black pieces will be added? choose row and column for each.  (manual adjacency test)";
+				selection(2);
+			}
+			else if (remadd == 'w') {
+				cout << "What white pieces will be added? choose row and column for each.  (manual adjacency test)";
+				selection(1);
+			}
+			else{
+				cout <<"\n invalid choice, restarting selection";
+			}
+	display();
+	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+	cin >> remadd;
 	}
 }
+
 
 
 void board::setFirst() {
-	cout << "who is first? \n select 1 for AI and 2 for opponent: ";
-	cin >> first;
+	int select;
+	char ans;
+	while (ans != y) {
+		cout << "who is first? \n select 1 for AI and 2 for opponent: ";
+		cin >> select;
+		if {select = 2)
+		{
+		first == false;
+		cout << "You go first";
+		}
+		else if (select = 1)
+		{
+			first == true;
+			cout << " 'I' go first";
+		}
+		else {
+			cout << "error"
+		}
+		cout << "Is this correct? y for yes";
+		cin << ans;
+	}
+	}
 }
+
 void board::setColor() {
 	cout << "\n What color is the AI? \n 1 for white and 2 for black:";
 	cin >> color;
+	if (color = 2)
+	{
+		humanColor == 1;
+	}
+	else if (color = 1)
+	{
+		humanColor == 2;
+	}
+	else {
+		cout << "error"
+	}
 }
 /*MAY NOT BE NEEDED*/
 
 bool board::isFull(int i, int j) {
 
-	if (board[i][j] = 0)
-
-	{
-
+	if (board[i][j] = 0){
 		return false;
-
 	}
 
 	else {
-
 		return true;
-
 	}
-
 }
+
+
 int board::calibrate(int i, int color)
 {
-	if (color == 2) { return i % 2; }
-	else { return (i + 1) % 2; }
+	/*takes row index to ensure correct color
+	square used for operating calling calibrate
+	the math is both neccessary for an even numbered board
+	and more efficient than other calibration methods tried
+	*/
+	if (color == 2) 
+	{ return i % 2; }
+	//starting index of an even i will be 0
+	else 
+	//starting index of an even i will be 1
+	{ return (i + 1) % 2; }
 }
 
 void board::display() {
-    cout<< "X= Black, O = White, Spaces for empty \n\n";
+    cout<< "X= Black, 0 = White, Spaces for empty \n\n";
 	cout << "   ";
 	int row = 0;
 	for (int i = 0; i < 8; i++){
@@ -204,7 +233,7 @@ void board::display() {
 	}
 	cout<< "\n \n";
 	for (int i = 0; i < 8; i++) {
-        cout <<++row <<"  ";
+        cout << ++row <<"  ";
 
 		for (int j = 0; j < 8; j++) {
 
@@ -227,7 +256,7 @@ void board::display() {
 
 
 
-bool board::legal_move(int i, int j, int Dir)
+bool board::legal_move(int i, int j, int Dir, int dtri)
 {
     int k = i;
 	int m = j;
@@ -290,35 +319,33 @@ bool board::legal_move(int i, int j, int Dir)
 	//make move? or not.
 }
 
-void board::makeMove(int i, int j, int Dir, int Pcolor) {
+void board::makeMove(int i, int j, int Dir, int playerColor, int dtri) {
 
 	board[i][j] = 0 ;
 
 	if (i > 1 && Dir == 0)
 	{
 		board[i - 1][j] = 0;
-		board[i - 2][j] = Pcolor;
+		board[i - 2][j] = playerColor;
 	}
 	if (i < 6 && Dir == 1)
 	{
 		board[i + 1][j] = 0;
-		board[i + 2][j] = Pcolor;
+		board[i + 2][j] = playerColor;
 	}
 	if (j > 1 && Dir == 2)
 	{
 		board[j - 1][j] = 0;
-		board[j - 2][j] = Pcolor;
+		board[j - 2][j] = playerColor;
 	}
 	if (j < 6 && Dir == 3)
 	{
 		board[j + 1][j] = 0;
-		board[j + 2][j] = Pcolor;
+		board[j + 2][j] = playerColor;
 	}
 }
 
 
-	void setDepth();   //sets depth for sim
-	/*possible TODOs*/
 	/*AI Game Playing Functions, in a loop every turn
 	void ABmax();		//maximizer for AI sim, may want it to be separate from this class?
 	void ABmin();       //minimizer for AI sim, may want it to be separate from this class?
@@ -335,42 +362,71 @@ the utility(best/worst) value of the node is returned.
 */
 
 
-
-
 /*ALPHABETA MINIMAX BELOW*/
-	
-/*int board::alphaBetaMinimax( int alpha,
-            int beta, int level, int depth)
-{
-// Initial values of
-// Aplha and Beta
-// Terminating condition. i.e
-// leaf node is reached
-    if (level == depth)
-        return board.static_eval(board); //Need to fix the board
 
+
+	/*TODO Some issues with this function, requires some surgery
+I feel TERRIBLE saying this, but it likely requires MORE break statements..
+and the return is in the wrong place I think...
+I have to write some yucky code (Break statements should be sparse in good code)*/
+
+
+
+int board::alphaBetaMinimax(int alpha, int beta, int level, int depth)
+{
+	// Initial values of
+	// Alpha and Beta
+	// Terminating condition. i.e
+	// leaf node is reached
+	if (level == depth) {
+		return board.static_eval(); //Need to fix the board
+	}
      if (level % 2 == 0)
-    {
+    {/*PROBLEM!!!????*/
         int best = MIN;
 
         for(int i=0;i<8;i++)
             {
-            	for(int j=0;j<8;j++)
+            	for(int j=calibrate(i, color);j<8;j+2)
             	{
             		if(board[i][j]>0)
             		{
+						for (int Dir = 0; Dir < 4; Dir++) {
+							legal_move(i, j, Dir);
+							/*****MOVE PIECE*****/
+							int val = minimax(alpha, beta, level + 1, depth);
+							held = max(best, val);
+							best = max(best, val);
+							alpha = max(alpha, best);
+							if (val > best && level == 0) {
+								//record move to array in terms of i,j,k,m
+							}
+							else {
+								//no change to array
+							}
+							alpha = max(alpha, best);
+							if (level == 0) {
 
-            			int val = minimax(alpha, beta, level+1,depth);
-            			best = max(best, val);
-           				alpha = max(alpha, best);
-
-            			// Alpha Beta Pruning
-            			if (beta <= alpha)
-                		break;
+							}
+							// Alpha Beta Pruning
+							if (beta <= alpha) {
+								break;
+							}
+						}
+						if (beta <= alpha) {
+							break;
+						}
         			}
-        		return best;
+					if (beta <= alpha) {
+						break;
+					}
+
     			}
+				if (beta <= alpha) {
+					break;
+				}
     		}
+		return best;
     }
     else
     {
@@ -379,11 +435,11 @@ the utility(best/worst) value of the node is returned.
 
         for(int i=0;i<8;i++)
             {
-            	for(int j=0;j<8;j++)
+            	for(int j=calibrate(i, playerColor);j<8;j+2)
             	{
             		if(board[i][j]>0)
             		{
-
+						/*****MOVE PIECE*****/
             			int val = minimax(alpha, beta, level+1,depth);
             			best = min(best, val);
             			beta = min(beta, best);
@@ -422,10 +478,30 @@ int board::static_eval() {
 }
 */
 
+int board::static_eval() {
+	int count = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (board[i][j] > 0)
+			{
+
+				for (int Dir = 0; Dir < 4; Dir++) {
+					if (legal_move(i, j, Dir)) {
+						count++;
+					}
+
+				}
+
+			}
+			return count;
+		}
+	}
+}
 
 
-
-/*STRICT MIMIMAX BELOW*/
+/*STRICT MINIMAX BELOW*/
 
 /* int board::minimax(int level,int depth)
 {
@@ -507,20 +583,40 @@ int main() {
 	int B = 2;
 	int W = 1;
 	int Dir = 0;
-	bool color;
-	bool first;
-	int p = 0;
-	int i=0;
-	int j = 0;
+	bool color, first AIturn;
+	bool, ingameState == true;
 	char correct;
 	board board;
 
 	board.setFirst();
+	if (first == true) {
+		AIturn == true
+	}
 	board.setColor();
 	board.display();
-	board.manualOverrideR();
-	cout << "\n is board correct? \n \n";
-	board.display();
+	board.manualOverride();
+	cout << "\n is board correct? y for yes, n for no \n \n";
+	while (ingameState == true) {
+		while (ans != 'y') {
+			board.manualOverride();
+			cout << "\n is board correct? y for yes, n for no \n \n";
+			board.display();
+			cin << ans;
+		}
+
+		if (AIturn == true) {
+			board.
+			//make move
+		}
+
+		else {
+			//Need a take player input function
+			board.makeMove(i, j, Dir, playerColor);
+			//take input for move from player
+		}
+
+	}
+	
 /*	if (board.getFirst = 1)
 	{
 		//generate tree

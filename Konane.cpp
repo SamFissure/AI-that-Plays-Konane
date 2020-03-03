@@ -43,9 +43,7 @@ static const int LOSE = -199;
 static const int WIN = 199;
 
 
-int depth;
-int color;
-int humanColor;
+int depth, color, playerColor, humanColor;
 bool first=true;
 
 /*int getFirst{return first;}
@@ -57,7 +55,8 @@ class board {
 	int W = 1;
 	int X = 0;
 	int Dir = 0;
-	int drti = 0;
+	//deprecated
+	int drti = 1;
 	/*TODO set this in set color*/
 
 	/*set the Static ints before compile,
@@ -65,6 +64,7 @@ class board {
 
 
 	int bestmove[4];
+	int currentmove[4];
 	char AtoH[8] = { 'A','B','C','D','E','F','G','H' };
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W},
@@ -87,11 +87,13 @@ public:
 	void manualOverride(); //piece removal, for fixing board errors and for setup.
 	bool isFull(int i, int j);
 	//test for legality of move
-	bool legal_move(int i, int j, int Dir);
-	void makeMove(int i, int j, int Dir, int playerColor);
+	bool legal_move(int i, int j, int Dir, int dtri);
+	bool legal_SEF(int i, int j, int Dir, int dtri);
+	void makeMove(int i, int j, int k, int m, int dtri);
+	void unmakeMove(int i, int j, int k, int m, int dtri);
 	int calibrate(int i, int color);
-    int alphaBetaMinimax(int alpha, int beta, int level, int depth);
-    int static_eval();
+    int alphaBetaMinimax(int alpha, int beta, int level, int depth, int color);
+    int SEF();
 	void selection(int S);
 	/*
 	int minimax(int level,int depth);
@@ -102,6 +104,8 @@ public:
 
 };
 
+
+/***ASSISTS MANUAL OVVERIDE***/
 void board::selection(int S) {
 	int z = S;
 	int i, j;
@@ -120,10 +124,13 @@ void board::selection(int S) {
 	}
 }
 
+
+/***FOR SETUP AND MANUAL BOARD CORRECTIONS IF ERRORS MADE,***
+***ASSUMES SOME INTELLIGENCE ON PART OF USER***/
 void board::manualOverride() {
 	int p = 0;
 	int i, j;
-	char ans, ans2, remadd;
+	char remadd;
 	display();
 	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
 	cin >> remadd;
@@ -153,14 +160,14 @@ void board::manualOverride() {
 }
 
 
-
+/***NEEDED FOR FIRST TURN, NOT NEEDED AFTER***/
 void board::setFirst() {
 	int select;
 	char ans;
-	while (ans != y) {
+	while (ans != 'y') {
 		cout << "who is first? \n select 1 for AI and 2 for opponent: ";
 		cin >> select;
-		if {select = 2)
+		if (select = 2)
 		{
 		first == false;
 		cout << "You go first";
@@ -171,14 +178,15 @@ void board::setFirst() {
 			cout << " 'I' go first";
 		}
 		else {
-			cout << "error"
+			cout << "error";
 		}
 		cout << "Is this correct? y for yes";
-		cin << ans;
-	}
+		cin >> ans;
 	}
 }
 
+
+/***CRITICAL FOR ENTIRE GAME, SET COLOR HERE***/
 void board::setColor() {
 	cout << "\n What color is the AI? \n 1 for white and 2 for black:";
 	cin >> color;
@@ -191,11 +199,12 @@ void board::setColor() {
 		humanColor == 2;
 	}
 	else {
-		cout << "error"
+		cout << "error";
 	}
 }
-/*MAY NOT BE NEEDED*/
 
+
+/***SPACE TEST FOR PRESENCE OF PIECE***/
 bool board::isFull(int i, int j) {
 
 	if (board[i][j] = 0){
@@ -208,6 +217,9 @@ bool board::isFull(int i, int j) {
 }
 
 
+/***ASSISTS WITH CALIBRATION OF SQUARES, DEALS WITH DOUBLE WHITE/BLACK BOARD EDGE ISSUE***/
+
+//NOT TESTED YET!!!!!!!
 int board::calibrate(int i, int color)
 {
 	/*takes row index to ensure correct color
@@ -215,14 +227,16 @@ int board::calibrate(int i, int color)
 	the math is both neccessary for an even numbered board
 	and more efficient than other calibration methods tried
 	*/
-	if (color == 2) 
+	if (color == 2)
 	{ return i % 2; }
 	//starting index of an even i will be 0
-	else 
+	else
 	//starting index of an even i will be 1
 	{ return (i + 1) % 2; }
 }
 
+
+/***FAIRLY STANDARD DISPLAY FUNCTION***/
 void board::display() {
     cout<< "X= Black, 0 = White, Spaces for empty \n\n";
 	cout << "   ";
@@ -252,15 +266,13 @@ void board::display() {
 	}
 }
 
-
-
-
-
-bool board::legal_move(int i, int j, int Dir, int dtri)
+/***TESTS LEGALITY OF MOVE***/
+//NOT TESTED YET!!!  MAY WANT TO REFACTOR!
+bool board::legal_SEF(int i, int j, int Dir, int dtri)
 {
-    int k = i;
+	int k = i;
 	int m = j;
-    bool state;
+	bool state;
 	if (Dir = 0) //N
 	{
 		if (i > 1) {
@@ -316,35 +328,141 @@ bool board::legal_move(int i, int j, int Dir, int dtri)
 			return true;
 		}
 	}
-	//make move? or not.
 }
+bool board::legal_move(int i, int j, int Dir, int dtri)
+{
+    int k = i;
+	int m = j;
+    bool state;
+	if (Dir = 0) //N
+	{
+		if (i > 1) {
+			k--;
+			state = isFull(k, m);
+			if (state == true) {
+				k--;
+			}
+			state = isFull(k, m);
+			if (state == false) {
+				currentmove[0] = i;
+				currentmove[1] = j;
+				currentmove[2] = k;
+				currentmove[3] = m;
+				return true;
+			}
+		}
+	}
+	if (Dir = 1) //S
+		if (i < 5) {
+			{
+				k++;
+				state = isFull(k, m);
+				if (state == true) {
+					k++;
+				}
+				state = isFull(k, m);
+				if (state == false) {
+					currentmove[0] = i;
+					currentmove[1] = j;
+					currentmove[2] = k;
+					currentmove[3] = m;
+					return true;
+				}
+			}
+		}
+	if (Dir = 2)  //W
+	{
+		if (j > 1) {
+			m--;
+			state = isFull(k, m);
+			if (state == true) {
+				m--;
+			}
+			state = isFull(k, m);
+			if (state == false) {
+				currentmove[0] = i;
+				currentmove[1] = j;
+				currentmove[2] = k;
+				currentmove[3] = m;
+				return true;
+			}
+		}
+	}
 
-void board::makeMove(int i, int j, int Dir, int playerColor, int dtri) {
+	if (Dir = 3) //E
+	{
+		m++;
+		state = isFull(k, m);
+		if (state == true) {
+			m++;
+		}
+		state = isFull(k, m);
+		if (state == false) {
+			currentmove[0] = i;
+			currentmove[1] = j;
+			currentmove[2] = k;
+			currentmove[3] = m;
+			return true;
+		}
+	}
+	//if no move valid
+return false;
+}
+/***ASSUMES LEGAL MOVE HAS BEEN EXECUTED,***
+****MAKES MOVE RECORDED BY LEGAL MOVE***
+****MAY BE REFACTORED INTO LEGAL MOVE (NON SEF)***/
+void board::makeMove(int i, int j, int k, int m, int dtri) {
 
 	board[i][j] = 0 ;
-
-	if (i > 1 && Dir == 0)
+	if (k < i)
 	{
 		board[i - 1][j] = 0;
 		board[i - 2][j] = playerColor;
 	}
-	if (i < 6 && Dir == 1)
+	if (k > i)
 	{
 		board[i + 1][j] = 0;
 		board[i + 2][j] = playerColor;
 	}
-	if (j > 1 && Dir == 2)
+	if (m < j)
 	{
 		board[j - 1][j] = 0;
 		board[j - 2][j] = playerColor;
 	}
-	if (j < 6 && Dir == 3)
+	if (m > j)
 	{
 		board[j + 1][j] = 0;
 		board[j + 2][j] = playerColor;
 	}
+	//check for double move (somehow)
 }
-
+void board::unmakeMove(int i, int j, int k, int m, int dtri)
+/*currently being refactored, is make move*/ {
+	while (dtri > 0) {
+		board[i][j] = playerColor;
+		if (k < i)
+		{
+			board[i - 1][j] = humanColor;
+			board[i - 2][j] = 0;
+		}
+		if (k > i)
+		{
+			board[i + 1][j] = humanColor;
+			board[i + 2][j] = 0;
+		}
+		if (m < j)
+		{
+			board[j - 1][j] = humanColor;
+			board[j - 2][j] = 0;
+		}
+		if (m > j)
+		{
+			board[j + 1][j] = humanColor;
+			board[j + 2][j] = 0;
+		}
+		dtri--;
+	}
+}
 
 	/*AI Game Playing Functions, in a loop every turn
 	void ABmax();		//maximizer for AI sim, may want it to be separate from this class?
@@ -370,20 +488,45 @@ I feel TERRIBLE saying this, but it likely requires MORE break statements..
 and the return is in the wrong place I think...
 I have to write some yucky code (Break statements should be sparse in good code)*/
 
+int board::SEF() {
+    int count=0;
+    int dtri;
+    int Dir;
+    for(int i=0;i<8;i++)
+    {
+        for(int j=0;j<8;j++)
+        {
+            if(board[i][j]>0)
+            {
+      		    for(int Dir=0;Dir<4;Dir++){
+                    if(legal_SEF(i,j,Dir,dtri)){
+                        count++;
+                    }
 
+                }
 
-int board::alphaBetaMinimax(int alpha, int beta, int level, int depth)
+            }
+
+        }
+    }
+    return count;
+}
+
+int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int color)
 {
+    int held;
+    int dtri;
+    int k, m;
 	// Initial values of
 	// Alpha and Beta
 	// Terminating condition. i.e
 	// leaf node is reached
 	if (level == depth) {
-		return board.static_eval(); //Need to fix the board
+		return SEF(); //Need to fix the board
 	}
      if (level % 2 == 0)
     {/*PROBLEM!!!????*/
-        int best = MIN;
+        int val = MIN;
 
         for(int i=0;i<8;i++)
             {
@@ -392,112 +535,59 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth)
             		if(board[i][j]>0)
             		{
 						for (int Dir = 0; Dir < 4; Dir++) {
-							legal_move(i, j, Dir);
-							/*****MOVE PIECE*****/
-							int val = minimax(alpha, beta, level + 1, depth);
-							held = max(best, val);
-							best = max(best, val);
-							alpha = max(alpha, best);
-							if (val > best && level == 0) {
-								//record move to array in terms of i,j,k,m
+							/***NEEDS WORK ON LM***/
+							if (legal_move(i, j, Dir, dtri)) {
+								/*****MOVE PIECE*****/
+								i = currentmove[0];
+								j = currentmove[1];
+								k = currentmove[2];
+								m = currentmove[3];
+								unmakeMove(i, j, k, m, dtri);
+								val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, color));
+								alpha = max(alpha, val);
+								/*if (level == 0 && SOMETHING) {
+									bestmove[] = currentmove[];
+								}
+								undoMove(i, j, k, m, dtri);
+								// Alpha Beta Pruning*/
+								if (beta <= alpha) {
+									return val;
+								}
 							}
-							else {
-								//no change to array
-							}
-							alpha = max(alpha, best);
-							if (level == 0) {
+						}
 
-							}
-							// Alpha Beta Pruning
-							if (beta <= alpha) {
-								break;
-							}
-						}
-						if (beta <= alpha) {
-							break;
-						}
         			}
-					if (beta <= alpha) {
-						break;
-					}
 
-    			}
-				if (beta <= alpha) {
-					break;
+
+
 				}
     		}
-		return best;
+
     }
     else
     {
-        int best = MAX;
-
-
+		int val = MAX;
         for(int i=0;i<8;i++)
-            {
-            	for(int j=calibrate(i, playerColor);j<8;j+2)
-            	{
-            		if(board[i][j]>0)
-            		{
-						/*****MOVE PIECE*****/
-            			int val = minimax(alpha, beta, level+1,depth);
-            			best = min(best, val);
-            			beta = min(beta, best);
-
-            			// Alpha Beta Pruning
-            			if (beta <= alpha)
-                			break;
-        		}
-        		return best;
-   		}
-	   }
-	}
-
-}
-
-int board::static_eval() {
-
-            for(int i=0;i<8;i++)
-            {
-            	for(int j=0;j<8;j++)
-            	{
-            		if(board[i][j]>0)
-            		{
-            			int count=0;
-            		    for(int Dir=0;Dir<4;Dir++){
-            				if(legal_move(i,j,Dir)){
-            					count++;
-							}
-
-            			}
-
-            		}
-            		return count;
-            	}
-            }
-}
-*/
-
-int board::static_eval() {
-	int count = 0;
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			if (board[i][j] > 0)
-			{
-
-				for (int Dir = 0; Dir < 4; Dir++) {
-					if (legal_move(i, j, Dir)) {
-						count++;
+           {
+           	for(int j=calibrate(i, playerColor);j<8;j+2)
+           	{
+				if (board[i][j] > 0)
+				{
+					/*****MOVE PIECE*****/
+					val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, color));
+					//best = min(best, val);
+					beta = min(beta, val);
+											// Alpha Beta Pruning
+					if (beta <= alpha) {
+						return val;
 					}
-
 				}
-
-			}
-			return count;
-		}
+        	}
+ 		}
+		return val;
 	}
+	 cout << "ERROR";
+	 return -10000000;
 }
 
 
@@ -583,49 +673,54 @@ int main() {
 	int B = 2;
 	int W = 1;
 	int Dir = 0;
-	bool color, first AIturn;
-	bool, ingameState == true;
-	char correct;
+	int i,j,k,m, alpha, beta, level, dtri;
+	bool color, first, AIturn, ingameState;
+	ingameState == true;
+	char correct, ans;
 	board board;
 
 	board.setFirst();
 	if (first == true) {
-		AIturn == true
+		AIturn == true;
 	}
 	board.setColor();
 	board.display();
 	board.manualOverride();
-	cout << "\n is board correct? y for yes, n for no \n \n";
+	/*
 	while (ingameState == true) {
 		while (ans != 'y') {
-			board.manualOverride();
 			cout << "\n is board correct? y for yes, n for no \n \n";
+			board.manualOverride();
 			board.display();
-			cin << ans;
+			cin >> ans;
 		}
-
 		if (AIturn == true) {
-			board.
-			//make move
-		}
+			board.alphaBetaMinimax(alpha, beta, level, depth, color);
+			i = bestmove[0];
+			j = bestmove[1];
+			k = bestmove[2];
+			m = bestmove[3];
 
+			board.makeMove(i, j, Dir, color, dtri);
+		}
 		else {
-			//Need a take player input function
-			board.makeMove(i, j, Dir, playerColor);
-			//take input for move from player
-		}
+			cout << "enter piece to move row, 1-8";
+			cin >> i;
+			i--;
 
-	}
-	
-/*	if (board.getFirst = 1)
-	{
-		//generate tree
-		//move
-		//move order is set in class.
-	}
-	else
-	{
-		//take input and wait.
+			cout << "enter piece to move column, 1-8";
+			cin >> j;
+			j--;
+
+			cout << "enter piece destination row, 1-8";
+			cin >> k;
+			k--;
+
+			cout << "enter piece destination column, 1-8";
+			cin >> m;
+			m--;
+			board.makeMove(i, j, k, m, dtri);
+		}
 	}*/
 	return 0;
 }

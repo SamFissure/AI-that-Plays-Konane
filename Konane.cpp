@@ -34,7 +34,6 @@
 #include <fstream>
 #include <cstdlib>
 #include <string>
-
 using namespace std;
 /*TODO .h file for the class???*/
 /*global variables used due to performance increase (according to stackoverflow)*/
@@ -105,7 +104,7 @@ public:
 void board::selection(int S) {
 	int z = S;
 	int i, j;
-	cout << "\n column (A-B = 1-8): ";
+	cout << "\n column (A-H = 1-8): ";
 	cin >> j;
 	cout << "\n row (1-8): ";
 	cin >> i;
@@ -226,9 +225,10 @@ int board::calibrate(int i, int playerColor)
 
 /***FAIRLY STANDARD DISPLAY FUNCTION***/
 void board::display() {
-    cout<< "\nX= Black, 0 = White, Spaces for empty \n\n";
+    cout<< "\n\nX= Black, 0 = White, Spaces for empty squares\n\n";
 	int row = 0;
-    cout << "   A B C D E F G H ";
+	cout << "   A B C D E F G H \n";
+    cout << "   1 2 3 4 5 6 7 8 ";
 
 	cout<< "\n \n";
 	for (int i = 0; i < 8; i++) {
@@ -323,7 +323,6 @@ bool board::legal_SEF(int i, int j, int Dir)
 /***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED***/
 bool board::legal_move(int currentmove[], int i, int j, int Dir)
 {
-    cout<<"\n inside lm ";
 	if (i > 7) { return false; }
 	if (j > 7) { return false; }
 	int k = i;
@@ -469,7 +468,6 @@ void board::makeMove(int currentmove[], int playerColor)
         board[i][j + 1] = 0;
         board[i][j + 2] = playerColor;
     }
-		display();
 }
 
 
@@ -697,7 +695,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 						}
 				}
 			}
-			}
+			}5
 		}
 			return best_value;
 		}
@@ -711,7 +709,7 @@ int main() {
 	int Dir = 0;
 	int i,j,k,m, alpha, beta;
 	int level=0;
-	int depth = 2;
+	int depth = 7;
 	bool AIturn, ingameState;
 	ingameState = true;
 	char correct, ans;
@@ -735,13 +733,13 @@ int main() {
 			cin >> ans;
 		}
 		if (AIturn == true) {
-            cout<<"thinking";
 			board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
-			cout << "MAKING ACTUAL MOVE";
+			cout << "\nMAKING ACTUAL MOVE";
+			board.display();
 			board.makeMove(board.bestmove, AIcolor);
 			board.display();
-			AIturn=false;
-		}
+            AIturn=false;
+            }
 		else {
 			cout << "enter piece to move row, 1-8";
 			cin >> i;

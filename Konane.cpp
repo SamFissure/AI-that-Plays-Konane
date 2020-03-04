@@ -43,18 +43,16 @@ static const int LOSE = -199;
 static const int WIN = 199;
 bool first;
 //color is AI, humanColor is opponent
-int color, humanColor;
+int AIcolor, humanColor;
 
 
 /*int getFirst{return first;}
-int getColor {return color;}
+int getColor {return AIcolor;}
 int getPlayerColor {return playerColor;}
 int getDepth {return depth;}*/
 class board {
 	static const int B = 2;
 	static const int W = 1;
-
-	static const int killswitch = 5;
 	/*TODO set this in set color*/
 
 
@@ -62,7 +60,6 @@ class board {
 	fine tune as needed with each compile*/
 
 
-	char AtoH[8] = { 'A','B','C','D','E','F','G','H' };
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B},
@@ -87,10 +84,10 @@ public:
 	bool isFull(int i, int j);
 	//test for legality of move
 	bool legal_move(int currentmove[], int i, int j, int Dir);
-	bool legal_SEF(int i, int j, int Dir, int dtri);
+	bool legal_SEF(int i, int j, int Dir);
 	void makeMove(int currentmove[], int playerColor);
-	void unmakeMove(int currentmove[], int playerColor);
-	int calibrate(int i, int color);
+	void unmakeMove(int currentmove[], int playerColor, int opColor);
+	int calibrate(int i, int playerColor);
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
     int SEF();
 	void selection(int S);
@@ -186,12 +183,12 @@ void board::setFirst() {
 /***CRITICAL FOR ENTIRE GAME, SET COLOR HERE***/
 void board::setColor() {
 	cout << "\n What color is the AI? \n 1 for white and 2 for black:";
-	cin >> color;
-	if (color == 2)
+	cin >> AIcolor;
+	if (AIcolor == 2)
 	{
 		humanColor = 1;
 	}
-	else if (color == 1)
+	else if (AIcolor == 1)
 	{
 		humanColor = 2;
 	}
@@ -215,14 +212,9 @@ bool board::isFull(int i, int j) {
 
 
 /***ASSISTS WITH CALIBRATION OF SQUARES, DEALS WITH DOUBLE WHITE/BLACK BOARD EDGE ISSUE***/
-int board::calibrate(int i, int color)
+int board::calibrate(int i, int playerColor)
 {
-	/*takes row index to ensure correct color
-	square used for operating calling calibrate
-	the math is both neccessary for an even numbered board
-	and more efficient than other calibration methods tried
-	*/
-	if (color == 2)
+	if (playerColor == 2)
 	{ return i % 2; }
 	//starting index of an even i will be 0
 	else
@@ -260,7 +252,7 @@ void board::display() {
 
 /***TESTS LEGALITY OF MOVE***/
 //NOT TESTED YET!!!  MAY WANT TO REFACTOR!
-bool board::legal_SEF(int i, int j, int Dir, int dtri)
+bool board::legal_SEF(int i, int j, int Dir)
 {
 	int k = i;
 	int m = j;
@@ -352,6 +344,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					currentmove[1] = j;
 					currentmove[2] = k;
 					currentmove[3] = m;
+					cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 0);
 					return true;
@@ -361,7 +354,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 	}
 	if (Dir == 1) //S
 	{
-		if (i < 5)
+		if (i < 6)
 			{
 				k++;
 				state = isFull(k, m);
@@ -373,6 +366,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 						currentmove[1] = j;
 						currentmove[2] = k;
 						currentmove[3] = m;
+						cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 						//tests state of Legal Move and NOT the presence of a piece on a space
 						//state = legal_move(currentmove, k, m, 1);}
 						return true;
@@ -395,6 +389,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					currentmove[1] = j;
 					currentmove[2] = k;
 					currentmove[3] = m;
+					cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 2);
 					return true;
@@ -406,7 +401,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 
 	if (Dir == 3) //E
 	{
-		if (j < 5) {
+		if (j < 6) {
 			m++;
 			state = isFull(k, m);
 			if (state == true) {
@@ -418,6 +413,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					currentmove[1] = j;
 					currentmove[2] = k;
 					currentmove[3] = m;
+					cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 3);
 					return true;
@@ -445,91 +441,67 @@ void board::makeMove(int currentmove[], int playerColor)
 	cout<<"\n"<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
 	neq = true;
 
-	while (neq) {
-		board[i][j] = 0;
-		if (k < i)
-		{
-			board[i - 1][j] = 0;
-			board[i - 2][j] = playerColor;
-			if (i - 2 == k) {
-				neq = false;
-			}/*
+
+    board[i][j] = 0;
+    if (k < i)
+    {
+        board[i - 1][j] = 0;
+        board[i - 2][j] = playerColor;/*
 			else {
 				//since moves are not finished, i starts again 2 spaces away
 				i = i - 2;
 			}*/
-		}
-		if (k > i)
-		{
-			board[i + 1][j] = 0;
-			board[i + 2][j] = playerColor;
-			if (i + 2 == k) {
-				neq = false;
-			}/*
-			else {
-				i = i + 2;
-			}*/
-		}
-		if (m < j)
-		{
-			board[i][j - 1] = 0;
-			board[i][j - 2] = playerColor;
-			if (j - 2 == m) {
-				neq = false;
-			}/*
-			else {
-				j = j - 2;
-			}*/
-		}
-		if (m > j)
-		{
-			board[i][j + 1] = 0;
-			board[i][j + 2] = playerColor;
-			if (j + 2 == m) {
-				neq = false;
-			}/*
-			else {
-				j = j + 2;
-			}*/
-		}
-	}
-	display();
+    }
+    if (k > i)
+    {
+        board[i + 1][j] = 0;
+        board[i + 2][j] = playerColor;
+    }
+    if (m < j)
+    {
+        board[i][j - 1] = 0;
+        board[i][j - 2] = playerColor;
+    }
+    if (m > j)
+    {
+        board[i][j + 1] = 0;
+        board[i][j + 2] = playerColor;
+    }
+		display();
 }
 
 
 
-void board::unmakeMove(int currentmove[],int playerColor) {
+void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
     int i,j,k,m;
-    bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
-	neq = true;
 	cout << "unmaking move \n";
-	while (neq) {
-		board[i][j] = color;
+		board[i][j] = playerColor;
 		if (k < i)
 		{
-			board[i - 1][j] = playerColor;
+			board[i - 1][j] = opColor;
 			board[i - 2][j] = 0;
 		}
 		if (k > i)
 		{
-			board[i + 1][j] = playerColor;
+			board[i + 1][j] = opColor;
 			board[i + 2][j] = 0;
 		}
 		if (m < j)
 		{
-			board[j - 1][j] = playerColor;
-			board[j - 2][j] = 0;
+			board[i][j-1] = opColor;
+			board[i][j-2] = 0;
 		}
 		if (m > j)
 		{
-			board[j + 1][j] = playerColor;
-			board[j + 2][j] = 0;
+			board[i][j+1] = opColor;
+			board[i][j+2] = 0;
 		}
-	}
+		cout << "\n" << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
+		display();
 }
 
 	/*AI Game Playing Functions, in a loop every turn
@@ -561,12 +533,12 @@ int board::SEF() {
     int Dir;
     for(int i=0;i<8;i++)
     {
-        for(int j=calibrate(i,color);j<8;j++)
+        for(int j=calibrate(i,AIcolor);j<8;j++)
         {
             if(board[i][j]>0)
             {
       		    for(int Dir=0;Dir<4;Dir++){
-                    if(legal_SEF(i,j,Dir,dtri)){
+                    if(legal_SEF(i,j,Dir)){
                         count++;
                     }
 
@@ -584,14 +556,16 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 
     int bestmove[4];
 	int temp;
-    int k, m;
+    int k, m, tshoot;
 	// Initial values of
 	// Alpha and Beta
 	// Terminating condition. i.e
 	// leaf node, is reached
 	int currentmove[4];
 	if (level == depth) {
-		return SEF(); //Need to fix the board
+		tshoot= SEF(); //Need to fix the board
+		cout<<"\nSEF= "<<tshoot<<"\n";
+		return tshoot;
 	}
 	else if (maximizing==true)
     {/*PROBLEM!!!????*/
@@ -599,31 +573,25 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 
         for(int i=0;i<8;i++)
             {
-            	for(int j=calibrate(i, color);j<8;j=j+2)
+            	for(int j=calibrate(i, AIcolor);j<8;j=j+2)
             	{
             		if(board[i][j]>0)
             		{
 						for (int Dir = 0; Dir < 4; Dir++) {
-							/***NEEDS WORK ON LM***/
 
 							if (legal_move(currentmove,i, j, Dir)) {
 								/*****MOVE PIECE*****/
-                                for (int z=0;z<4;z++)
-                                {
-                                    cout<<" "<<currentmove[z]+1<<" ";
-                                }
-								makeMove(currentmove, color);
+								makeMove(currentmove, AIcolor);
 								//calls for minimization using the human color
 								temp = alphaBetaMinimax(alpha, beta, level + 1, depth, humanColor, false);
-								unmakeMove(currentmove, color);
+								unmakeMove(currentmove,AIcolor,humanColor);
 								if (level == 0 && val < temp) {
                                     for(int z=0;z<4;z++){
                                         bestmove[z] = currentmove[z];
-										currentmove[z] = -1;
                                     }
 								}
 								val = max(temp, val);
-
+                                cout<<val;
 								alpha = max(alpha, val);
 
 								if (beta <= alpha) {
@@ -645,7 +613,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
         currentmove[1]=-1;
         currentmove[2]=-1;
         currentmove[3]=-1;
-        cout<<"minimizing";
+        cout<<"minimizing \n";
 		int val = MAX;
         for(int i=0;i<8;i++)
            {
@@ -654,18 +622,17 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 				if (board[i][j] > 0)
 				{
 				    for (int Dir = 0; Dir < 4; Dir++) {
+                            /**LEGAL MOVE IS NOT BEING LOOPED THROUGH??**/
                             if (legal_move(currentmove,i, j, Dir)) {
-                                    display();
-                                    for (int z=0;z<4;z++)
-                                {
+                                    for (int z=0;z<4;z++){
                                     cout<<" "<<currentmove[z]+1<<" ";
-                                }
-                                    makeMove(currentmove, humanColor);
+                                    }
 
-                                    val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, color, true));
+                                    makeMove(currentmove, humanColor);
+                                    val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, AIcolor, true));
                                     //best = min(best, val);
                                     beta = min(beta, val);
-                                    unmakeMove(currentmove, humanColor);
+                                    unmakeMove(currentmove, humanColor, AIcolor);
                                     // Alpha Beta Pruning
                                     if (beta <= alpha) {
                                         return val;
@@ -677,8 +644,8 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
  		}
 		return val;
 	}
-	 cout << "ERROR";
-	 return -50000000;
+	cout << "ERROR";
+	return -1;
 }
 
 
@@ -750,7 +717,7 @@ int main() {
 	int Dir = 0;
 	int i,j,k,m, alpha, beta;
 	int level=0;
-	int depth = 4;
+	int depth = 2;
 	bool AIturn, ingameState;
 	ingameState = true;
 	char correct, ans;
@@ -775,8 +742,8 @@ int main() {
 		}
 		if (AIturn == true) {
             cout<<"thinking";
-			board.alphaBetaMinimax(alpha, beta, level, depth, color, true);
-			board.makeMove(board.bestmove, color);
+			board.alphaBetaMinimax(alpha, beta, level, depth, AIcolor, true);
+			board.makeMove(board.bestmove, AIcolor);
 			board.display();
 			AIturn=false;
 		}

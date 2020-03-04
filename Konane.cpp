@@ -37,6 +37,7 @@
 
 using namespace std;
 /*TODO .h file for the class???*/
+/*global variables used due to performance increase (according to stackoverflow)*/
 static const int MAX = 999;
 static const int MIN = -999;
 static const int LOSE = -199;
@@ -104,7 +105,7 @@ public:
 void board::selection(int S) {
 	int z = S;
 	int i, j;
-	cout << "\n \n column (A-B = 1-8): ";
+	cout << "\n column (A-B = 1-8): ";
 	cin >> j;
 	cout << "\n row (1-8): ";
 	cin >> i;
@@ -132,20 +133,20 @@ void board::manualOverride() {
 			if (remadd == 'e'){}
 			else if (remadd == 'r')
 			{
-				cout << "What pieces will be removed? choose row and column for each.  (manual adjacency test)";
+				cout << "What pieces will be removed? choose row and column for each.  (manual adjacency test)\n";
 				selection(0);
 			}
 			else if (remadd == 'b')
 			{
-				cout << "What black pieces will be added? choose row and column for each.  (manual adjacency test)";
+				cout << "What black pieces will be added? choose row and column for each.  (manual adjacency test)\n";
 				selection(2);
 			}
 			else if (remadd == 'w') {
-				cout << "What white pieces will be added? choose row and column for each.  (manual adjacency test)";
+				cout << "What white pieces will be added? choose row and column for each.  (manual adjacency test)\n";
 				selection(1);
 			}
 			else{
-				cout <<"\n invalid choice, restarting selection";
+				cout <<"\n invalid choice, restarting selection\n";
 			}
 	display();
 	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
@@ -164,17 +165,17 @@ void board::setFirst() {
 		if (select == 2)
 		{
 		first = false;
-		cout << "You go first";
+		cout << "\nYou go first";
 		}
 		else if (select == 1)
 		{
 			first = true;
-			cout << " 'I' go first";
+			cout << "\n 'I' go first";
 		}
 		else {
-			cout << "error";
+			cout << "\nerror";
 		}
-		cout << "Is this correct? y for yes";
+		cout << "\nIs this correct? y for yes";
 		cin >> ans;
 	}
 }
@@ -193,7 +194,7 @@ void board::setColor() {
 		humanColor = 2;
 	}
 	else {
-		cout << "error";
+		cout << "\nerror";
 	}
 }
 
@@ -225,7 +226,7 @@ int board::calibrate(int i, int playerColor)
 
 /***FAIRLY STANDARD DISPLAY FUNCTION***/
 void board::display() {
-    cout<< "X= Black, 0 = White, Spaces for empty \n\n";
+    cout<< "\nX= Black, 0 = White, Spaces for empty \n\n";
 	int row = 0;
     cout << "   A B C D E F G H ";
 
@@ -322,6 +323,7 @@ bool board::legal_SEF(int i, int j, int Dir)
 /***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED***/
 bool board::legal_move(int currentmove[], int i, int j, int Dir)
 {
+    cout<<"\n inside lm ";
 	if (i > 7) { return false; }
 	if (j > 7) { return false; }
 	int k = i;
@@ -344,7 +346,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					currentmove[1] = j;
 					currentmove[2] = k;
 					currentmove[3] = m;
-					cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
+					cout<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 0);
 					return true;
@@ -366,7 +368,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 						currentmove[1] = j;
 						currentmove[2] = k;
 						currentmove[3] = m;
-						cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
+						cout<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 						//tests state of Legal Move and NOT the presence of a piece on a space
 						//state = legal_move(currentmove, k, m, 1);}
 						return true;
@@ -389,7 +391,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					currentmove[1] = j;
 					currentmove[2] = k;
 					currentmove[3] = m;
-					cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
+					cout<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 2);
 					return true;
@@ -413,7 +415,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					currentmove[1] = j;
 					currentmove[2] = k;
 					currentmove[3] = m;
-					cout<<"\n lm "<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
+					cout<<i<<", "<<j<<", "<<k<<", "<<m<<"\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 3);
 					return true;
@@ -554,7 +556,6 @@ int board::SEF() {
 int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing)
 {
 
-    int bestmove[4];
 	int temp;
     int k, m, tshoot;
 	// Initial values of
@@ -578,19 +579,19 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
             		if(board[i][j]>0)
             		{
 						for (int Dir = 0; Dir < 4; Dir++) {
-
-							if (legal_move(currentmove,i, j, Dir)) {
+							if (legal_move(currentmove, i, j, Dir)) {
 								/*****MOVE PIECE*****/
 								makeMove(currentmove, AIcolor);
 								//calls for minimization using the human color
-								temp = alphaBetaMinimax(alpha, beta, level + 1, depth, humanColor, false);
+								temp=val;
+								val=max(val,alphaBetaMinimax(alpha, beta, level + 1, depth, humanColor, false));
 								unmakeMove(currentmove,AIcolor,humanColor);
-								if (level == 0 && val < temp) {
-                                    for(int z=0;z<4;z++){
-                                        bestmove[z] = currentmove[z];
-                                    }
+								if (level == 0 && temp<=val) {
+                                        bestmove[0]=currentmove[0];
+                                        bestmove[1]=currentmove[1];
+                                        bestmove[2]=currentmove[2];
+                                        bestmove[3]=currentmove[3];
 								}
-								val = max(temp, val);
                                 cout<<val;
 								alpha = max(alpha, val);
 
@@ -599,20 +600,13 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 								}
 							}
 						}
-
         			}
-
-
-
 				}
     		}
     return val;
     }
     else
-    {   currentmove[0]=-1;
-        currentmove[1]=-1;
-        currentmove[2]=-1;
-        currentmove[3]=-1;
+    {
         cout<<"minimizing \n";
 		int val = MAX;
         for(int i=0;i<8;i++)
@@ -622,8 +616,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 				if (board[i][j] > 0)
 				{
 				    for (int Dir = 0; Dir < 4; Dir++) {
-                            /**LEGAL MOVE IS NOT BEING LOOPED THROUGH??**/
-                            if (legal_move(currentmove,i, j, Dir)) {
+						if (legal_move(currentmove, i, j, Dir)) {
                                     for (int z=0;z<4;z++){
                                     cout<<" "<<currentmove[z]+1<<" ";
                                     }
@@ -638,6 +631,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
                                         return val;
                                     }
                                 }
+                                else{}
                             }
                 }
         	}
@@ -742,7 +736,8 @@ int main() {
 		}
 		if (AIturn == true) {
             cout<<"thinking";
-			board.alphaBetaMinimax(alpha, beta, level, depth, AIcolor, true);
+			board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
+			cout << "MAKING ACTUAL MOVE";
 			board.makeMove(board.bestmove, AIcolor);
 			board.display();
 			AIturn=false;

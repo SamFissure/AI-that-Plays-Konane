@@ -52,12 +52,10 @@ int getColor {return color;}
 int getPlayerColor {return playerColor;}
 int getDepth {return depth;}*/
 class board {
-	int B = 2;
-	int W = 1;
-	int X = 0;
-	int Dir = 0;
-	//deprecated
-	int drti = 1;
+	static const int B = 2;
+	static const int W = 1;
+
+	
 	/*TODO set this in set color*/
 
 
@@ -80,6 +78,7 @@ public:
 	/*all functions void functions until code is fully determined.*/
 
 	/*SETTERS*/
+	void setValues(int b, int w,int x,int dir);
 	void setFirst();
 	void setColor();
     int bestmove[4];
@@ -326,6 +325,7 @@ bool board::legal_SEF(int i, int j, int Dir, int dtri)
 			return true;
 		}
 	}
+	return false;
 }
 
 /***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED***/
@@ -610,7 +610,7 @@ int board::SEF() {
 
 int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor)
 {
-    int currentmove[4];
+    
     int bestmove[4];
 	int temp;
     int k, m;
@@ -618,7 +618,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	// Alpha and Beta
 	// Terminating condition. i.e
 	// leaf node, is reached
-	currentmove[-1, -1, -1, -1];
+	int currentmove[4] = {-1, -1, -1, -1};
 	if (level == depth) {
 		return SEF(); //Need to fix the board
 	}
@@ -628,7 +628,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 
         for(int i=0;i<8;i++)
             {
-            	for(int j=calibrate(i, color);j<8;j+2)
+            	for(int j=calibrate(i, color);j<8;j=j+2)
             	{
             		if(board[i][j]>0)
             		{
@@ -679,7 +679,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		int val = MAX;
         for(int i=0;i<8;i++)
            {
-           	for(int j=calibrate(i, humanColor);j<8;j+2)
+           	for(int j=calibrate(i, humanColor);j<8;j=j+2)
            	{
 				if (board[i][j] > 0)
 				{
@@ -802,19 +802,19 @@ int main() {
 			cout << "enter piece to move row, 1-8";
 			cin >> i;
 			i--;
-
+			board.bestmove[0]=i;
 			cout << "enter piece to move column, 1-8";
 			cin >> j;
 			j--;
-
+			board.bestmove[1]=j;
 			cout << "enter piece destination row, 1-8";
 			cin >> k;
 			k--;
-
+			board.bestmove[2]=k;
 			cout << "enter piece destination column, 1-8";
 			cin >> m;
 			m--;
-			board.bestmove[i,j,k,m];
+			board.bestmove[3]=m;
 			board.makeMove(board.bestmove,humanColor);
 			board.display();
 		}

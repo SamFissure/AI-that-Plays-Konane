@@ -82,12 +82,12 @@ public:
 	bool isFull(int i, int j);
 	//test for legality of move
 	bool legal_move(int currentmove[], int i, int j, int Dir);
-	bool legal_SEF(int i, int j, int Dir, int playerColor);
+	bool legal_SEF(int i, int j, int Dir);
 	void makeMove(int currentmove[], int playerColor);
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
 	int calibrate(int i, int playerColor);
 	int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
-	int SEF(int playerColor);
+	int SEF(bool maximizing);
 	void selection(int S);
 	/*
 	int minimax(int level,int depth);
@@ -97,6 +97,13 @@ public:
 
 };
 
+/*
+The minimax algorithm begins at the current state of the game recursively searching the
+game tree for the optimal move depth-first, which means exploring a branch as far as it goes and
+then backtracking until a path that has not been explored is found. Once the algorithm reaches a
+leaf node, which indicates a terminal state, or reaches the specified search depth in the game tree
+the utility(best/worst) value of the node is returned.
+*/
 
 /*ALPHABETA MINIMAX BELOW*/
 int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing)
@@ -110,28 +117,19 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	 *leaf node, is reached*/
 	int currentmove[4];
 	if (level == depth) {
-		if (maximizing == false) {
-			tshoot = SEF(humanColor);
+			tshoot = SEF(maximizing);
 			cout << "\nSEF= " << tshoot << "\n";
 			return tshoot;
-		}
-		else if (maximizing == true) {
-			//Need to fix the board
-			tshoot = SEF(AIcolor);
-			cout << "\nSEF= " << tshoot << "\n";
-			return tshoot;
-		}
-		else { cout << "SEF ERROR"; }
 	}
-	else if (maximizing == true)
+    if (maximizing == true)
 	{/*PROBLEM!!!????*/
-		int val = MIN;
+        int val = MIN;
 
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = calibrate(i, AIcolor); j < 8; j = j + 2)
 			{
-				if (board[i][j] > 0)
+				if (board[i][j] >0 )
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
@@ -139,6 +137,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							makeMove(currentmove, AIcolor);
 							//calls for minimization using the human color
 							temp = val;
+							display();
 							val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, humanColor, false));
 							unmakeMove(currentmove, AIcolor, humanColor);
 							if (level == 0 && temp <= val) {
@@ -260,6 +259,9 @@ void board::manualOverride() {
 			}
 			else{
 				cout <<"\n invalid choice, restarting selection\n";
+                display();
+                cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+                cin >> remadd;
 			}
 	display();
 	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
@@ -356,7 +358,7 @@ void board::display() {
 				cout << "X ";
 			}
 			else if (board[i][j] > 0) {
-				cout << "0 ";
+				cout << "O ";
 			}
 			else {
 				cout << "  ";
@@ -368,7 +370,7 @@ void board::display() {
 
 /***TESTS LEGALITY OF MOVE***/
 //NOT TESTED YET!!!  MAY WANT TO REFACTOR!
-bool board::legal_SEF(int i, int j, int Dir, int Playercolor)
+bool board::legal_SEF(int i, int j, int Dir)
 {
 	int k = i;
 	int m = j;
@@ -400,7 +402,7 @@ bool board::legal_SEF(int i, int j, int Dir, int Playercolor)
 						return true;
 					}
 				}
-			}
+				}
 
 		}
 	if (Dir == 2)  //W
@@ -435,121 +437,137 @@ bool board::legal_SEF(int i, int j, int Dir, int Playercolor)
 	return false;
 }
 
+
 /***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED***/
-bool board::legal_move(int currentmove[], int i, int j, int Dir, bool Doublestate)
+bool board::legal_move(int currentmove[], int i, int j, int Dir)
 {
-	int k = i;
+    bool state;
+    int k = i;
 	int m = j;
-	bool state, Doublestate;
 	if (Dir == 0) //N
 	{
-		if (i > 1) {
-			k--;
-			state = isFull(k, m);
-
-			if (state == true) {
+		if (k > 1) {
+            k--;
+            state = isFull(k, m);
+            if (state == true) {
 				k--;
 				state = isFull(k, m);
+			if (state == false) {
+                currentmove[0] = i;
+                currentmove[1] = j;
+                currentmove[2] = k;
+                currentmove[3] = m;
+                    if(k>1){
+                        k--;
+                        state = isFull(k, m);
+                        if (state == true) {
+                            k--;
+                            state = isFull(k, m);
+                            if (state == false) {
+                                currentmove[2] = k;
+                                currentmove[3] = m;
+                            }
+
+					}
+                    }
+					return true;
+                }
 			}
-				/*if invalid move, recursive call will return false
-				but will not edit array
-				if VALID move, recursive call calls again until false
-				probem with losing initial move*/
-				if (state == false) {
-					check = 1;
-					currentmove[0] = i;
-					currentmove[1] = j;
-					currentmove[2] = k;
-					currentmove[3] = m;
-					return Doublestate = legal_move(currentmove, k, m, 0);
-					cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-					//tests state of Legal Move and NOT the presence of a piece on a space
-					//state = legal_move(currentmove, k, m, 0);
-				}
 		}
 	}
 	if (Dir == 1) //S
 	{
-		if (i < 6)
-			{
-
+        if (k < 6) {
+            k++;
+            state = isFull(k, m);
+            if (state == true) {
 				k++;
 				state = isFull(k, m);
-				if (state == true) {
-					k++;
-					Doublestate = isFull(k, m);
-					if (state == false) {
-						check = 1;
-						currentmove[0] = i;
-						currentmove[1] = j;
-						currentmove[2] = k;
-						currentmove[3] = m;
-						cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-						//tests state of Legal Move and NOT the presence of a piece on a space
-						//state = legal_move(currentmove, k, m, 1);}
-						return Doublestate = legal_move(currentmove, k, m, 1);
-					}
-				}
+			if (state == false) {
+                currentmove[0] = i;
+                currentmove[1] = j;
+                currentmove[2] = k;
+                currentmove[3] = m;
+                    if(k<6){
+                        k++;
+                        state = isFull(k, m);
+                        if (state == true) {
+                            k++;
+                            state = isFull(k, m);
+                            if (state == false) {
+                                currentmove[2] = k;
+                                currentmove[3] = m;
+                            }
 
+					}
+                    }
+					return true;
+                }
 			}
-		//the Doublestate is true, but the bounds have been met?
+		}
 	}
 	if (Dir == 2)  //W
 	{
-		if (j > 1) {
-			m--;
-			state = isFull(k, m);
-			if (state == true) {
+		if (m > 1) {
+            m--;
+            state = isFull(k, m);
+            if (state == true) {
 				m--;
 				state = isFull(k, m);
-				if (state == false) {
-					check = 1;
-					currentmove[0] = i;
-					currentmove[1] = j;
-					currentmove[2] = k;
-					currentmove[3] = m;
-					cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-					//tests state of Legal Move and NOT the presence of a piece on a space
-					//state = legal_move(currentmove, k, m, 2);
-					return Doublestate = legal_move(currentmove, k, m, 2);
-				}
-			}
+			if (state == false) {
+                currentmove[0] = i;
+                currentmove[1] = j;
+                currentmove[2] = k;
+                currentmove[3] = m;
+                    if(m>1){
+                        m--;
+                        state = isFull(k, m);
+                        if (state == true) {
+                            m--;
+                            state = isFull(k, m);
+                            if (state == false) {
+                                currentmove[2] = k;
+                                currentmove[3] = m;
+                            }
 
+					}
+                    }
+					return true;
+                }
+			}
 		}
 	}
 
 	if (Dir == 3) //E
 	{
-
-		if (j < 6) {
-			m++;
-			state = isFull(k, m);
-			if (state == true) {
+		if (m <6) {
+            m++;
+            state = isFull(k, m);
+            if (state == true) {
 				m++;
 				state = isFull(k, m);
-				if (state == false) {
-					check = 1;
-					currentmove[0] = i;
-					currentmove[1] = j;
-					currentmove[2] = k;
-					currentmove[3] = m;
-					cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-					//tests state of Legal Move and NOT the presence of a piece on a space
-					//state = legal_move(currentmove, k, m, 3);
-					return Doublestate == legal_move(currentmove, k, m, 3);
+			if (state == false) {
+                currentmove[0] = i;
+                currentmove[1] = j;
+                currentmove[2] = k;
+                currentmove[3] = m;
+                    if(m<6){
+                        m++;
+                        state = isFull(k, m);
+                        if (state == true) {
+                            m++;
+                            state = isFull(k, m);
+                            if (state == false) {
+                                currentmove[2] = k;
+                                currentmove[3] = m;
+                            }
 
-
-				}
+					}
+                    }
+					return true;
+                }
 			}
-
-
 		}
-	}
-	if (check < 1) {
-		/*a multi-jump has been recursively attempted and failed due to 
-		/failing a condition, 
-		/array is still correct, and move is valid*/.
-		return true;
 	}
 	//if no move at all
 	return false;
@@ -561,163 +579,187 @@ void board::makeMove(int currentmove[], int playerColor)
 {
 	cout << "making move";
 	int i, j, k, m;
-	bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
 	cout << " " << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-	neq = true;
-	do {
+	display();
+
 		board[i][j] = 0;
 		if (k < i)
 		{
-			board[i - 1][j] = 0;
-			board[i - 2][j] = playerColor;
-			if (i - 2 == k) {
-				neq = false;
+		    i--;
+			board[i][j] = 0;
+			i--;
+			board[i][j] = playerColor;
+			if (k < i)
+            {
+            board[i][j] = 0;
+		    i--;
+			board[i][j] = 0;
+			i--;
+			board[i][j] = playerColor;
 			}
-			else {
-				//since moves are not finished, i starts again 2 spaces away
-				i = i - 2;
 			}
-		}
 		if (k > i)
 		{
-			board[i + 1][j] = 0;
-			board[i + 2][j] = playerColor;
-			if (i + 2 == k) {
-				neq = false;
-			}
-			else {
-				i = i + 2;
-			}
-		}
+		    i++;
+			board[i][j] = 0;
+			i++;
+			board[i][j] = playerColor;
+			if (k > i)
+            {
+                board[i][j] = 0;
+                i++;
+                board[i][j] = 0;
+                i++;
+                board[i][j] = playerColor;
+            }
 		if (m < j)
 		{
-			board[i][j - 1] = 0;
-			board[i][j - 2] = playerColor;
-			if (j - 2 == m) {
-				neq = false;
-			}
-			else {
-				j = j - 2;
+		    j--;
+			board[i][j] = 0;
+			j--;
+			board[i][j] = playerColor;
+			if (m < j)
+            {
+		    board[i][j] = 0;
+		    j--;
+			board[i][j] = 0;
+			j--;
+			board[i][j] = playerColor;
 			}
 		}
 		if (m > j)
 		{
-			board[i][j + 1] = 0;
-			board[i][j + 2] = playerColor;
-			if (j + 2 == m) {
-				neq = false;
-			}
-			else {
-				j = j + 2;
+		    j++;
+			board[i][j] = 0;
+			j++;
+			board[i][j] = playerColor;
+			if (m > j)
+            {
+		    board[i][j] = 0;
+		    j++;
+			board[i][j] = 0;
+			j++;
+			board[i][j] = playerColor;
 			}
 		}
-	} while (neq);
+    	display();
+	}
 }
 
 
 void board::unmakeMove(int currentmove[], int playerColor, int opColor) {
 	int i, j, k, m;
-	bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
-	cout << "unmaking move: ";
-	do {
-		board[i][j] = playerColor;
+	cout << "unmaking move: " << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
+		board[k][m] = 0;
 		if (k < i)
 		{
-			board[i - 1][j] = opColor;
-			board[i - 2][j] = 0;
-			if (i - 2 == k) {
-				neq = false;
-			}
-			else {
-				//since moves are not unmade, i starts again 2 spaces away
-				i = i - 2;
+		    k++;
+			board[k][m] = opColor;
+			k++;
+			board[k][m] = playerColor;
+
+            if (k < i)
+            {
+                board[k][m] = 0;
+                k++;
+                board[k][m] = opColor;
+                k++;
+                board[k][m] = playerColor;
 			}
 		}
 		if (k > i)
 		{
-			board[i + 1][j] = opColor;
-			board[i + 2][j] = 0;
-			if (i + 2 == k) {
-				neq = false;
-			}
-			else {
-				i = i + 2;
+		    k--;
+			board[i][j] = opColor;
+			k--;
+			board[i][j] = playerColor;
+			if (k>i) {
+                board[k][m] = 0;
+                k--;
+                board[k][m] = opColor;
+                k--;
+                board[k][m] = playerColor;
 			}
 		}
 		if (m < j)
 		{
-			board[i][j - 1] = opColor;
-			board[i][j - 2] = 0;
-			if (j - 2 == m) {
-				neq = false;
-			}
-			else {
-				j = j - 2;
-			}
+		    m++;
+			board[k][m] = opColor;
+			m++;
+			board[k][m] = playerColor;
+
+            if (m < j)
+            {
+                board[k][m] = 0;
+                m++;
+                board[k][m] = opColor;
+                m++;
+                board[k][m] = playerColor;
+
+            }
 		}
 		if (m > j)
 		{
-			board[i][j + 1] = opColor;
-			board[i][j + 2] = 0;
-			if (j + 2 == m) {
-				neq = false;
-			}
-			else {
-				j = j + 2;
+		    m--;
+			board[k][m] = opColor;
+			m--;
+			board[k][m] = playerColor;
+
+            if (m > j)
+            {
+                board[k][m] = 0;
+                m--;
+                board[k][m] = opColor;
+                m--;
+                board[k][m] = playerColor;
 			}
 		}
-		cout << " " << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-	} while (neq);
+		display();
 }
 
-	/*AI Game Playing Functions, in a loop every turn
-	void ABmax();		//maximizer for AI sim, may want it to be separate from this class?
-	void ABmin();       //minimizer for AI sim, may want it to be separate from this class?
-	Make a move in-game
-	void chosenMove();  //states move chosen, implements... probably unneccessary*/
 
-	/*
-The minimax algorithm begins at the current state of the game recursively searching the
-game tree for the optimal move depth-first, which means exploring a branch as far as it goes and
-then backtracking until a path that has not been explored is found. Once the algorithm reaches a
-leaf node, which indicates a terminal state, or reaches the specified search depth in the game tree
-the utility(best/worst) value of the node is returned.
-*/
-
-
-
-
-
-int board::SEF(int playerColor) {
-	int count = 0;
-	bool valid;
-	int i, j, Dir;
+int board::SEF(bool maximizing) {
+	int sum=0;
 	for (int i = 0; i < 8; i++)
 	{
-		for (int j = calibrate(i, playerColor); j < 8; j++)
+		for (int j = calibrate(i, AIcolor); j < 8; j++)
 		{
 			if (board[i][j] > 0)
 			{
+			    sum++;
 				for (int Dir = 0; Dir < 4; Dir++) {
-					valid = legal_SEF(i, j, Dir, playerColor);
-					if (valid) {
-						count++;
+					if (legal_SEF(i, j, Dir)) {
+						sum++;
 					}
-					valid = false;
 				}
 
 			}
+
 		}
 	}
-	return count;
+    for (int i = 0; i < 8; i++)
+    {
+		for (int j = calibrate(i, humanColor); j < 8; j++)
+        {
+			if (board[i][j]<1)
+            {
+			    sum--;
+            }
+
+        }
+
+    }
+cout<<"SEF EXECUTED";
+	display();
+	return sum;
 }
 
 
@@ -727,7 +769,7 @@ int main() {
 	int i, j, k, m, alpha, beta, state;
 	int level = 0;
 	int jokes;
-	int depth = 7;
+	int depth = 5;
 	bool AIturn, ingameState;
 	ingameState = true;
 	char correct, ans;
@@ -760,18 +802,17 @@ int main() {
 			board.display();
 			if (state == LOSE_GAME)
 			{
-				//LOSE FIX IN MINMAX
-				cout << "I think I just lost.  Daisy Daisy....\n";
+				cout << "I think I just lost.  If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
 
 			}
 			else if (state == WIN)
 			{
-				cout << "It looks like I will win soon, but I may be wrong, so let's keep playing. \n";
+				cout << "It looks like I will win soon, but I may have undiscovered bugs, so let's keep playing. \n";
 				board.makeMove(board.bestmove, AIcolor);
 			}
 			else if (state == LOSE)
 			{
-				cout << "It looks like I will lose soon, but we should play it out. \n";
+				cout << "Dave, Dave, I wouldn't do that if I were you.\n";
 				board.makeMove(board.bestmove, AIcolor);
 			}
 			else {

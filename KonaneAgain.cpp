@@ -619,6 +619,7 @@ void board::makeMove(int currentmove[], int playerColor)
         }
     }
     }
+
     return;
 }
 
@@ -756,11 +757,8 @@ int main() {
 	int level=0;
 	int jokes;
 	//odd numbered depths are on min nodes, even on max.
-	int depth, setdepth;
-	cout<<"Set Depth?\n";
-	cin>>depth;
-	setdepth=depth;
-	cout<<"\n";
+	int depth = 7;
+	int temp = 7;
 	bool AIturn, ingameState;
 	ingameState = true;
 	char correct, ans;
@@ -769,7 +767,7 @@ int main() {
 	cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
 	cin >> jokes;
 	if (jokes == 3) {
-		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
+		cout << "That game is boring, so let's play Konane\n";
 	}
 	board.setFirst();
 	if (first == true) {
@@ -816,23 +814,22 @@ int main() {
 			AIturn = false;
             }
 		else {
-            if(turn=0&&first==true){
-
-                depth=depth-1;
-            }
+            if(turn<3){depth--;}
+			else if (turn=3){depth++;}
+            else if (turn>4){depth=temp;}
 			cout << "\nenter piece to move column, 1-8: ";
 			cin >> j;
 			j--;
 			board.bestmove[1]=j;
-			cout << "\nenter piece to move row, 1-8: ";
+            cout << "\nNow enter piece to move row, 1-8: ";
 			cin >> i;
 			i--;
 			board.bestmove[0]=i;
-			cout << "\nenter piece destination column, 1-8: ";
+            cout << "\nenter piece destination column, 1-8: ";
 			cin >> m;
 			m--;
 			board.bestmove[3]=m;
-			cout << "\nenter piece destination row, 1-8: ";
+			cout << "\nNow enter piece destination row, 1-8: ";
 			cin >> k;
 			k--;
 			board.bestmove[2]=k;
@@ -840,15 +837,8 @@ int main() {
 			board.makeMove(board.bestmove,humanColor);
 			board.display();
 			turn++;
-			if (turn<2)
-            {
-                depth = depth-1;
-            }
-            else if(turn>3)
-            {
-                depth = setdepth;
-            }
 			AIturn=true;
+
 		}
             cout << "\n is board correct? y for yes, n for no \n \n";
 			cin >> ans;

@@ -31,12 +31,13 @@
 		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
 		 */
 #include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <string>
 using namespace std;
 /*TODO .h file for the class???*/
 /*global variables used due to performance increase (according to stackoverflow)*/
+static const int LOSE_GAME = -500;
+static const int WIN_GAME = 500;
 static const int MAX = 999;
 static const int MIN = -999;
 static const int LOSE = -199;
@@ -46,6 +47,7 @@ bool first;
 int AIcolor, humanColor;
 
 
+
 /*int getFirst{return first;}
 int getColor {return AIcolor;}
 int getPlayerColor {return playerColor;}
@@ -53,13 +55,9 @@ int getDepth {return depth;}*/
 class board {
 	static const int B = 2;
 	static const int W = 1;
-	/*TODO set this in set color*/
-
 
 	/*set the Static ints before compile,
 	fine tune as needed with each compile*/
-
-
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B},
@@ -69,27 +67,27 @@ class board {
 		{W,B,W,B,W,B,W,B},
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B}
-		};
+	};
 public:
 	/*all functions void functions until code is fully determined.*/
 
 	/*SETTERS*/
-	void setValues(int b, int w,int x,int dir);
+	void setValues(int b, int w, int x, int dir);
 	void setFirst();
 	void setColor();
-    int bestmove[4];
-    int playermove[4];
+	int bestmove[4];
+	int playermove[4];
 	void display();
 	void manualOverride(); //piece removal, for fixing board errors and for setup.
 	bool isFull(int i, int j);
 	//test for legality of move
 	bool legal_move(int currentmove[], int i, int j, int Dir);
-	bool legal_SEF(int i, int j, int Dir);
+	bool legal_SEF(int i, int j, int Dir, int playerColor);
 	void makeMove(int currentmove[], int playerColor);
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
 	int calibrate(int i, int playerColor);
-    int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
-    int SEF();
+	int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
+	int SEF(int playerColor);
 	void selection(int S);
 	/*
 	int minimax(int level,int depth);
@@ -106,15 +104,24 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 
 	int temp;
 	int k, m, tshoot;
-	// Initial values of
-	// Alpha and Beta
-	// Terminating condition. i.e
-	// leaf node, is reached
+	/* Initial values of
+	 * Alpha and Beta
+	 * Terminating condition. i.e
+	 *leaf node, is reached*/
 	int currentmove[4];
 	if (level == depth) {
-		tshoot = SEF(); //Need to fix the board
-		cout << "\nSEF= " << tshoot << "\n";
-		return tshoot;
+		if (maximizing == false) {
+			tshoot = SEF(humanColor);
+			cout << "\nSEF= " << tshoot << "\n";
+			return tshoot;
+		}
+		else if (maximizing == true) {
+			//Need to fix the board
+			tshoot = SEF(AIcolor);
+			cout << "\nSEF= " << tshoot << "\n";
+			return tshoot;
+		}
+		else { cout << "SEF ERROR"; }
 	}
 	else if (maximizing == true)
 	{/*PROBLEM!!!????*/
@@ -155,6 +162,10 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		if (val == MIN)
 		{
 			return LOSE;
+		}
+		if (level == 0 && val == 0)
+		{
+			return LOSE_GAME;
 		}
 		return val;
 	}
@@ -285,7 +296,7 @@ void board::setFirst() {
 
 /***CRITICAL FOR ENTIRE GAME, SET COLOR HERE***/
 void board::setColor() {
-	cout << "\n What color is the AI? \n 1 for white and 2 for black:";
+	cout << "\n What color should I' play as? \n 1 for white and 2 for black:";
 	cin >> AIcolor;
 	if (AIcolor == 2)
 	{
@@ -296,9 +307,10 @@ void board::setColor() {
 		humanColor = 2;
 	}
 	else {
-		cout << "\nerror";
+		cout << "\nerror, restarting";
 	}
 }
+
 
 
 /***SPACE TEST FOR PRESENCE OF PIECE***/
@@ -356,7 +368,7 @@ void board::display() {
 
 /***TESTS LEGALITY OF MOVE***/
 //NOT TESTED YET!!!  MAY WANT TO REFACTOR!
-bool board::legal_SEF(int i, int j, int Dir)
+bool board::legal_SEF(int i, int j, int Dir, int Playercolor)
 {
 	int k = i;
 	int m = j;
@@ -388,7 +400,7 @@ bool board::legal_SEF(int i, int j, int Dir)
 						return true;
 					}
 				}
-				}
+			}
 
 		}
 	if (Dir == 2)  //W
@@ -424,48 +436,50 @@ bool board::legal_SEF(int i, int j, int Dir)
 }
 
 /***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED***/
-bool board::legal_move(int currentmove[], int i, int j, int Dir)
+bool board::legal_move(int currentmove[], int i, int j, int Dir, bool Doublestate)
 {
-	if (i > 7) { return false; }
-	if (j > 7) { return false; }
 	int k = i;
 	int m = j;
-	bool state;
+	bool state, Doublestate;
 	if (Dir == 0) //N
 	{
 		if (i > 1) {
 			k--;
 			state = isFull(k, m);
+
 			if (state == true) {
 				k--;
 				state = isFull(k, m);
+			}
 				/*if invalid move, recursive call will return false
 				but will not edit array
 				if VALID move, recursive call calls again until false
 				probem with losing initial move*/
 				if (state == false) {
+					check = 1;
 					currentmove[0] = i;
 					currentmove[1] = j;
 					currentmove[2] = k;
 					currentmove[3] = m;
+					return Doublestate = legal_move(currentmove, k, m, 0);
 					cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 0);
-					return true;
 				}
-			}
 		}
 	}
 	if (Dir == 1) //S
 	{
 		if (i < 6)
 			{
+
 				k++;
 				state = isFull(k, m);
 				if (state == true) {
 					k++;
-					state = isFull(k, m);
+					Doublestate = isFull(k, m);
 					if (state == false) {
+						check = 1;
 						currentmove[0] = i;
 						currentmove[1] = j;
 						currentmove[2] = k;
@@ -473,12 +487,12 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 						cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
 						//tests state of Legal Move and NOT the presence of a piece on a space
 						//state = legal_move(currentmove, k, m, 1);}
-						return true;
+						return Doublestate = legal_move(currentmove, k, m, 1);
 					}
 				}
 
 			}
-
+		//the Doublestate is true, but the bounds have been met?
 	}
 	if (Dir == 2)  //W
 	{
@@ -489,6 +503,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 				m--;
 				state = isFull(k, m);
 				if (state == false) {
+					check = 1;
 					currentmove[0] = i;
 					currentmove[1] = j;
 					currentmove[2] = k;
@@ -496,7 +511,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 2);
-					return true;
+					return Doublestate = legal_move(currentmove, k, m, 2);
 				}
 			}
 
@@ -505,6 +520,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 
 	if (Dir == 3) //E
 	{
+
 		if (j < 6) {
 			m++;
 			state = isFull(k, m);
@@ -512,7 +528,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 				m++;
 				state = isFull(k, m);
 				if (state == false) {
-
+					check = 1;
 					currentmove[0] = i;
 					currentmove[1] = j;
 					currentmove[2] = k;
@@ -520,91 +536,146 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 					cout << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
 					//tests state of Legal Move and NOT the presence of a piece on a space
 					//state = legal_move(currentmove, k, m, 3);
-					return true;
+					return Doublestate == legal_move(currentmove, k, m, 3);
+
+
 				}
 			}
 
 
 		}
-		//if no move valid
-
 	}
+	if (check < 1) {
+		/*a multi-jump has been recursively attempted and failed due to 
+		/failing a condition, 
+		/array is still correct, and move is valid*/.
+		return true;
+	}
+	//if no move at all
 	return false;
 }
 /***ASSUMES LEGAL MOVE HAS BEEN EXECUTED,***
 ****MAKES MOVE RECORDED BY LEGAL MOVE***
 ****MAY BE REFACTORED INTO LEGAL MOVE (NON SEF)***/
 void board::makeMove(int currentmove[], int playerColor)
-{   cout<<"making move";
-    int i,j,k,m;
-    bool neq;
+{
+	cout << "making move";
+	int i, j, k, m;
+	bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
-	cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
+	cout << " " << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
 	neq = true;
-
-
-    board[i][j] = 0;
-    if (k < i)
-    {
-        board[i - 1][j] = 0;
-        board[i - 2][j] = playerColor;/*
+	do {
+		board[i][j] = 0;
+		if (k < i)
+		{
+			board[i - 1][j] = 0;
+			board[i - 2][j] = playerColor;
+			if (i - 2 == k) {
+				neq = false;
+			}
 			else {
 				//since moves are not finished, i starts again 2 spaces away
 				i = i - 2;
-			}*/
-    }
-    if (k > i)
-    {
-        board[i + 1][j] = 0;
-        board[i + 2][j] = playerColor;
-    }
-    if (m < j)
-    {
-        board[i][j - 1] = 0;
-        board[i][j - 2] = playerColor;
-    }
-    if (m > j)
-    {
-        board[i][j + 1] = 0;
-        board[i][j + 2] = playerColor;
-    }
+			}
+		}
+		if (k > i)
+		{
+			board[i + 1][j] = 0;
+			board[i + 2][j] = playerColor;
+			if (i + 2 == k) {
+				neq = false;
+			}
+			else {
+				i = i + 2;
+			}
+		}
+		if (m < j)
+		{
+			board[i][j - 1] = 0;
+			board[i][j - 2] = playerColor;
+			if (j - 2 == m) {
+				neq = false;
+			}
+			else {
+				j = j - 2;
+			}
+		}
+		if (m > j)
+		{
+			board[i][j + 1] = 0;
+			board[i][j + 2] = playerColor;
+			if (j + 2 == m) {
+				neq = false;
+			}
+			else {
+				j = j + 2;
+			}
+		}
+	} while (neq);
 }
 
 
-
-void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
-    int i,j,k,m;
+void board::unmakeMove(int currentmove[], int playerColor, int opColor) {
+	int i, j, k, m;
+	bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
 	cout << "unmaking move: ";
+	do {
 		board[i][j] = playerColor;
 		if (k < i)
 		{
 			board[i - 1][j] = opColor;
 			board[i - 2][j] = 0;
+			if (i - 2 == k) {
+				neq = false;
+			}
+			else {
+				//since moves are not unmade, i starts again 2 spaces away
+				i = i - 2;
+			}
 		}
 		if (k > i)
 		{
 			board[i + 1][j] = opColor;
 			board[i + 2][j] = 0;
+			if (i + 2 == k) {
+				neq = false;
+			}
+			else {
+				i = i + 2;
+			}
 		}
 		if (m < j)
 		{
-			board[i][j-1] = opColor;
-			board[i][j-2] = 0;
+			board[i][j - 1] = opColor;
+			board[i][j - 2] = 0;
+			if (j - 2 == m) {
+				neq = false;
+			}
+			else {
+				j = j - 2;
+			}
 		}
 		if (m > j)
 		{
-			board[i][j+1] = opColor;
-			board[i][j+2] = 0;
+			board[i][j + 1] = opColor;
+			board[i][j + 2] = 0;
+			if (j + 2 == m) {
+				neq = false;
+			}
+			else {
+				j = j + 2;
+			}
 		}
 		cout << " " << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-
+	} while (neq);
 }
 
 	/*AI Game Playing Functions, in a loop every turn
@@ -625,51 +696,54 @@ the utility(best/worst) value of the node is returned.
 
 
 
-int board::SEF() {
-    int count=0;
-    int dtri;
-    int Dir;
-    for(int i=0;i<8;i++)
-    {
-        for(int j=calibrate(i,AIcolor);j<8;j++)
-        {
-            if(board[i][j]>0)
-            {
-      		    for(int Dir=0;Dir<4;Dir++){
-                    if(legal_SEF(i,j,Dir)){
-                        count++;
-                    }
+int board::SEF(int playerColor) {
+	int count = 0;
+	bool valid;
+	int i, j, Dir;
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = calibrate(i, playerColor); j < 8; j++)
+		{
+			if (board[i][j] > 0)
+			{
+				for (int Dir = 0; Dir < 4; Dir++) {
+					valid = legal_SEF(i, j, Dir, playerColor);
+					if (valid) {
+						count++;
+					}
+					valid = false;
+				}
 
-                }
-
-            }
-
-        }
-    }
-    return count;
+			}
+		}
+	}
+	return count;
 }
-
 
 
 int main() {
 
-	int B = 2;
-	int W = 1;
 	int Dir = 0;
-	int i,j,k,m, alpha, beta;
-	int level=0;
+	int i, j, k, m, alpha, beta, state;
+	int level = 0;
+	int jokes;
 	int depth = 7;
 	bool AIturn, ingameState;
 	ingameState = true;
 	char correct, ans;
 	board board;
-
+	cout << "Would you like to play a game? \n";
+	cout << "1. Konane \n2. ALSO Konane\n3.Global Thermonuclear War\n";
+	cin >> jokes;
+	if (jokes == 3) {
+		cout << "That game is boring, so let's play Konane\n";
+	}
 	board.setFirst();
 	if (first == true) {
 		AIturn = true;
 	}
-	else{
-        AIturn=false;
+	else {
+		AIturn = false;
 	}
 	board.setColor();
 	board.display();
@@ -678,38 +752,58 @@ int main() {
 		while (ans != 'y') {
 			board.manualOverride();
 			board.display();
-            cout << "\n is board correct? y for yes, n for no \n \n";
+			cout << "\n is board correct? y for yes, n for no \n \n";
 			cin >> ans;
 		}
 		if (AIturn == true) {
-			board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
-			cout << "\nMAKING ACTUAL MOVE";
+			state = board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
-			board.makeMove(board.bestmove, AIcolor);
+			if (state == LOSE_GAME)
+			{
+				//LOSE FIX IN MINMAX
+				cout << "I think I just lost.  Daisy Daisy....\n";
+
+			}
+			else if (state == WIN)
+			{
+				cout << "It looks like I will win soon, but I may be wrong, so let's keep playing. \n";
+				board.makeMove(board.bestmove, AIcolor);
+			}
+			else if (state == LOSE)
+			{
+				cout << "It looks like I will lose soon, but we should play it out. \n";
+				board.makeMove(board.bestmove, AIcolor);
+			}
+			else {
+				board.makeMove(board.bestmove, AIcolor);
+
+			}
 			board.display();
-            AIturn=false;
-            }
+			AIturn = false;
+		}
 		else {
-			cout << "enter piece to move row, 1-8";
+			cout << "\nenter piece to move row, 1-8: ";
 			cin >> i;
 			i--;
-			board.bestmove[0]=i;
-			cout << "enter piece to move column, 1-8";
+			board.bestmove[0] = i;
+			cout << "\nenter piece to move column, 1-8: ";
 			cin >> j;
 			j--;
-			board.bestmove[1]=j;
-			cout << "enter piece destination row, 1-8";
+			board.bestmove[1] = j;
+			cout << "\nenter piece destination row, 1-8: ";
 			cin >> k;
 			k--;
-			board.bestmove[2]=k;
-			cout << "enter piece destination column, 1-8";
+			board.bestmove[2] = k;
+			cout << "\nenter piece destination column, 1-8: ";
 			cin >> m;
 			m--;
-			board.bestmove[3]=m;
-			board.makeMove(board.bestmove,humanColor);
+			board.bestmove[3] = m;
+			board.makeMove(board.bestmove, humanColor);
 			board.display();
-			AIturn=true;
+			AIturn = true;
 		}
+		cout << "\n is board correct? y for yes, n for no \n \n";
+		cin >> ans;
 	}
 	return 0;
 }

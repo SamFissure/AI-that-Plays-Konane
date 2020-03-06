@@ -31,12 +31,13 @@
 		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
 		 */
 #include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <string>
 using namespace std;
 /*TODO .h file for the class???*/
 /*global variables used due to performance increase (according to stackoverflow)*/
+static const int LOSE_GAME = -500;
+static const int WIN_GAME = 500;
 static const int MAX = 999;
 static const int MIN = -999;
 static const int LOSE = -199;
@@ -53,13 +54,9 @@ int getDepth {return depth;}*/
 class board {
 	static const int B = 2;
 	static const int W = 1;
-	/*TODO set this in set color*/
-
 
 	/*set the Static ints before compile,
 	fine tune as needed with each compile*/
-
-
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B},
@@ -84,12 +81,12 @@ public:
 	bool isFull(int i, int j);
 	//test for legality of move
 	bool legal_move(int currentmove[], int i, int j, int Dir);
-	bool legal_SEF(int i, int j, int Dir);
+	bool legal_SEF(int i, int j, int Dir, int playerColor);
 	void makeMove(int currentmove[], int playerColor);
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
 	int calibrate(int i, int playerColor);
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
-    int SEF();
+    int SEF(int playerColor);
 	void selection(int S);
 	/*
 	int minimax(int level,int depth);
@@ -106,15 +103,24 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 
 	int temp;
 	int k, m, tshoot;
-	// Initial values of
-	// Alpha and Beta
-	// Terminating condition. i.e
-	// leaf node, is reached
+	/* Initial values of
+	 * Alpha and Beta
+	 * Terminating condition. i.e
+	 *leaf node, is reached*/
 	int currentmove[4];
 	if (level == depth) {
-		tshoot = SEF(); //Need to fix the board
-		cout << "\nSEF= " << tshoot << "\n";
-		return tshoot;
+		if (maximizing == false) {
+			tshoot = SEF(humanColor);
+			cout << "\nSEF= " << tshoot << "\n";
+			return tshoot;
+		}
+		else if (maximizing == true) {
+			//Need to fix the board
+			tshoot = SEF(AIcolor);
+			cout << "\nSEF= " << tshoot << "\n";
+			return tshoot;
+		}
+		else{cout<<"SEF ERROR";}
 	}
 	else if (maximizing == true)
 	{/*PROBLEM!!!????*/
@@ -155,6 +161,10 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		if (val == MIN)
 		{
 			return LOSE;
+		}
+		if (level == 0 && val == 0)
+		{
+			return LOSE_GAME;
 		}
 		return val;
 	}
@@ -285,7 +295,7 @@ void board::setFirst() {
 
 /***CRITICAL FOR ENTIRE GAME, SET COLOR HERE***/
 void board::setColor() {
-	cout << "\n What color is the AI? \n 1 for white and 2 for black:";
+	cout << "\n What color should I' play as? \n 1 for white and 2 for black:";
 	cin >> AIcolor;
 	if (AIcolor == 2)
 	{
@@ -296,7 +306,7 @@ void board::setColor() {
 		humanColor = 2;
 	}
 	else {
-		cout << "\nerror";
+		cout << "\nerror, restarting";
 	}
 }
 
@@ -356,7 +366,7 @@ void board::display() {
 
 /***TESTS LEGALITY OF MOVE***/
 //NOT TESTED YET!!!  MAY WANT TO REFACTOR!
-bool board::legal_SEF(int i, int j, int Dir)
+bool board::legal_SEF(int i, int j, int Dir, int Playercolor)
 {
 	int k = i;
 	int m = j;
@@ -535,7 +545,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 ****MAKES MOVE RECORDED BY LEGAL MOVE***
 ****MAY BE REFACTORED INTO LEGAL MOVE (NON SEF)***/
 void board::makeMove(int currentmove[], int playerColor)
-{   cout<<"making move";
+{   cout<<"making move\n";
     int i,j,k,m;
     bool neq;
 	i = currentmove[0];
@@ -581,7 +591,7 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
-	cout << "unmaking move: ";
+	cout << "\nunmaking move: ";
 		board[i][j] = playerColor;
 		if (k < i)
 		{
@@ -603,8 +613,6 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 			board[i][j+1] = opColor;
 			board[i][j+2] = 0;
 		}
-		cout << " " << i + 1 << ", " << j + 1 << ", " << k + 1 << ", " << m + 1 << "\n";
-
 }
 
 	/*AI Game Playing Functions, in a loop every turn
@@ -625,25 +633,25 @@ the utility(best/worst) value of the node is returned.
 
 
 
-int board::SEF() {
+int board::SEF(int playerColor) {
     int count=0;
-    int dtri;
-    int Dir;
+    bool valid;
+    int i,j, Dir;
     for(int i=0;i<8;i++)
     {
-        for(int j=calibrate(i,AIcolor);j<8;j++)
+        for(int j=calibrate(i,playerColor);j<8;j++)
         {
             if(board[i][j]>0)
             {
       		    for(int Dir=0;Dir<4;Dir++){
-                    if(legal_SEF(i,j,Dir)){
+                    valid=legal_SEF(i,j,Dir,playerColor);
+                    if(valid){
                         count++;
                     }
-
+                    valid=false;
                 }
 
             }
-
         }
     }
     return count;
@@ -653,17 +661,21 @@ int board::SEF() {
 
 int main() {
 
-	int B = 2;
-	int W = 1;
 	int Dir = 0;
-	int i,j,k,m, alpha, beta;
+	int i,j,k,m, alpha, beta, state;
 	int level=0;
+	int jokes;
 	int depth = 7;
 	bool AIturn, ingameState;
 	ingameState = true;
 	char correct, ans;
 	board board;
-
+	cout << "Would you like to play a game? \n";
+	cout << "1. Konane \n2. ALSO Konane\n3.Global Thermonuclear War\n";
+	cin >> jokes;
+	if (jokes == 3) {
+		cout << "That game is boring, so let's play Konane\n";
+	}
 	board.setFirst();
 	if (first == true) {
 		AIturn = true;
@@ -682,27 +694,45 @@ int main() {
 			cin >> ans;
 		}
 		if (AIturn == true) {
-			board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
-			cout << "\nMAKING ACTUAL MOVE";
+			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
-			board.makeMove(board.bestmove, AIcolor);
+            if (state == LOSE_GAME)
+			{
+				//LOSE FIX IN MINMAX
+				cout << "I think I just lost.  Daisy Daisy....\n";
+
+			}
+			else if (state== WIN)
+			{
+				cout << "It looks like I will win soon, but I may be wrong, so let's keep playing. \n";
+				board.makeMove(board.bestmove, AIcolor);
+			}
+			else if (state == LOSE)
+			{
+				cout << "It looks like I will lose soon, but we should play it out. \n";
+				board.makeMove(board.bestmove, AIcolor);
+			}
+			else {
+				board.makeMove(board.bestmove, AIcolor);
+
+			}
 			board.display();
-            AIturn=false;
+			AIturn = false;
             }
 		else {
-			cout << "enter piece to move row, 1-8";
+			cout << "\nenter piece to move row, 1-8: ";
 			cin >> i;
 			i--;
 			board.bestmove[0]=i;
-			cout << "enter piece to move column, 1-8";
+			cout << "\nenter piece to move column, 1-8: ";
 			cin >> j;
 			j--;
 			board.bestmove[1]=j;
-			cout << "enter piece destination row, 1-8";
+			cout << "\nenter piece destination row, 1-8: ";
 			cin >> k;
 			k--;
 			board.bestmove[2]=k;
-			cout << "enter piece destination column, 1-8";
+			cout << "\nenter piece destination column, 1-8: ";
 			cin >> m;
 			m--;
 			board.bestmove[3]=m;
@@ -710,6 +740,8 @@ int main() {
 			board.display();
 			AIturn=true;
 		}
+            cout << "\n is board correct? y for yes, n for no \n \n";
+			cin >> ans;
 	}
 	return 0;
 }

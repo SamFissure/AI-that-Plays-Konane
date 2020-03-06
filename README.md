@@ -4,7 +4,7 @@ A.I. that plays Konane.
 
 Significant contributions by both members.
 (i.e., using OOP we were able to get alot done in less time)
-We broke some OOP rules (some things made public, some global variables) in the name of speed
+We broke some OOP rules (some things made public, some global variables) in the name of processing speed (stackoverflow indicated that golbals often improve performance.
 For the tournament, the AI must decide on a move in 15 seconds or forfeit.
 I hope to make a final product that takes a bit longer but works better and with better code organization.
 I realize there are several files in this at the moment.

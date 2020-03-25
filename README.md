@@ -6,14 +6,14 @@ Significant contributions by both members.
 (i.e., using OOP we were able to get alot done in less time)
 We broke some OOP rules (some things made public, some global variables) in the name of processing speed (stackoverflow indicated that globals often improve performance.
 
-For the tournament, the AI must decide on a move in 15 seconds or forfeit.  
-Interestingly Big-O time seems to double with each successive move for the first few moves, causing some needed adaptations to solve the issue.
+For the tournament, the AI must move in 15 seconds or forfeit.  
+Big-O time seems to double with each successive move for the first few moves, which caused some needed adaptations to solve the issue.
 Some experimentation should be able to verify this result.
 
-Konane is an effective AI, but not optimal
+Konane.cpp is an effective AI, but not optimal
 
-KonaneAgain is functional and competitive (though the test output is strange, the results are correct)
-
+KonaneAgain.cpp (and KA2.cpp) is functional and competitive (though the test output is strange, the results are correct)
+__________________________________________________________________________________________________________________________________
 AS OF 3/25/2020 THE COMPETITION HAS PASSED AND THIS IS PURE HOBBYIST!!
 What that means:
 This program will be refactored in the following ways

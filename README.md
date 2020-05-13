@@ -3,6 +3,7 @@
 A.I. that plays Konane.
 --------------------------------------------------------------------------------
 AS OF 3/25/2020 THE COMPETITION HAS PASSED AND THIS IS PURE HOBBYIST!!
+__________________________________________________________________________________________________________________________________
 Competition variation:
 Significant contributions by both members.
 (i.e., using OOP we were able to get alot done in less time)

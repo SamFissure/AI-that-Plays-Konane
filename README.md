@@ -1,8 +1,8 @@
 # Konane AI 
 # Made by Tafroze and Sam (Robert).
 A.I. that plays Konane.
-AS OF 3/25/2020 THE COMPETITION HAS PASSED AND THIS IS PURE HOBBYIST!!
 --------------------------------------------------------------------------------
+AS OF 3/25/2020 THE COMPETITION HAS PASSED AND THIS IS PURE HOBBYIST!!
 Competition variation:
 Significant contributions by both members.
 (i.e., using OOP we were able to get alot done in less time)
@@ -14,9 +14,9 @@ Some experimentation should be able to verify this result.
 
 Konane.cpp is an effective AI, but not optimal, this will be fixed in the hobbyist phase
 __________________________________________________________________________________________________________________________________
-AS OF 3/25/2020 THE COMPETITION HAS PASSED AND THIS IS PURE HOBBYIST!!
-What that means:
-This program will be refactored in the following ways
+This is now hobbyist.
+What that means for the code:
+This code will be refactored in the following ways
 1. it will become more OOP where possible, 
 some global constants MAY become class-member variables.  Other alterations will be made to improve modularity and user-friendliness.
 2. the original (and KonaneAgain) will be preserved for performance reasons and comparative testing.

@@ -816,10 +816,6 @@ int main() {
 			AIturn = false;
             }
 		else {
-            if(turn=0&&first==true){
-
-                depth=depth-1;
-            }
 			cout << "\nenter piece to move column, 1-8: ";
 			cin >> j;
 			j--;
@@ -840,14 +836,6 @@ int main() {
 			board.makeMove(board.bestmove,humanColor);
 			board.display();
 			turn++;
-			if (turn<2)
-            {
-                depth = depth-1;
-            }
-            else if(turn>3)
-            {
-                depth = setdepth;
-            }
 			AIturn=true;
 		}
             cout << "\n is board correct? y for yes, n for no \n \n";

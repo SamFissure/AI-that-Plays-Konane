@@ -20,8 +20,7 @@ What that means for the code:
 This code will be refactored in the following ways
 1. it will become more OOP where possible, 
 some global constants MAY become class-member variables.  Other alterations will be made to improve modularity and user-friendliness.
-2. the original (and KonaneAgain) will be preserved for performance reasons and comparative testing.
-3. a zero-player game will be implemented to evaluate and enhance State Evaluation Functions and to test.
-4. the SEF will be enhanced to fix some outputted values that are unexpected.
-5. Code may be refactored to include more recursion where applicable.
-6. The program will be better timed out so as to verify performance, though the 15 second requirement will be dropped.
+2. a zero-player game will be implemented to evaluate and enhance State Evaluation Functions and to test.
+3. the SEF will be enhanced to fix some outputted values that are unexpected.
+4. Code may be refactored to include more recursion where applicable.
+5. The program will be better timed out so as to verify performance, though the 15 second requirement will be dropped.

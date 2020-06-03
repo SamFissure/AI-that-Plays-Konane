@@ -30,20 +30,17 @@
 		 *
 		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
 		 */
-#include <iostream>
-#include <cstdlib>
-#include <string>
-using namespace std;
-/*TODO .h file for the class???*/
-/*global variables used due to performance increase (according to stackoverflow)*/
-static const int LOSE_GAME = -500;
-static const int WIN_GAME = 500;
-static const int MAX = 999;
-static const int MIN = -999;
-static const int LOSE = -300;
-static const int WIN = 300;
+/* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
+#include "standard.h"
+#include "const.h"
+
+/*dynamic globals, may alter as needed*/
+
+/*AI FIRST*/
 bool first;
+/*AI TURN*/
 int turn;
+
 //color is AI, humanColor is opponent
 int AIcolor, humanColor;
 
@@ -263,7 +260,7 @@ void board::manualOverride() {
 }
 
 
-/***NEEDED FOR FIRST TURN, NOT NEEDED AFTER***/
+/***NEEDED FOR FIRST TURN, NOT NEEDED AFTER
 void board::setFirst() {
 	int select=0;
 	char ans;
@@ -287,22 +284,33 @@ void board::setFirst() {
 		cin >> ans;
 	}
 }
+***/
 
-
-/***CRITICAL FOR ENTIRE GAME, SET COLOR HERE***/
+/***CRITICAL FOR ENTIRE GAME, SET COLOR AND FIRST GLOBALS HERE***/
 void board::setColor() {
-	cout << "\n What color should 'I' play as? \n 1 for white and 2 for black:";
-	cin >> AIcolor;
-	if (AIcolor == 2)
-	{
-		humanColor = 1;
-	}
-	else if (AIcolor == 1)
-	{
-		humanColor = 2;
-	}
-	else {
-		cout << "\nerror, restarting";
+    char ans='n';
+    while (ans != 'y') {
+
+		cout << "\n What color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules)";
+        cin >> AIcolor;
+
+        if (AIcolor == 2)
+        {
+            humanColor = 1;
+            first = true;
+        cout<< "\n I play as black and go first.";
+        }
+        else if (AIcolor == 1)
+        {
+            humanColor = 2;
+            first = false;
+            cout<< "\n I play as white and go second.";
+        }
+        else {
+            cout << "\nerror, restarting";
+        }
+        cout << "\nIs this correct? y for yes";
+		cin >> ans;
 	}
 }
 
@@ -771,14 +779,13 @@ int main() {
 	if (jokes == 3) {
 		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
-	board.setFirst();
+	board.setColor();
 	if (first == true) {
 		AIturn = true;
 	}
 	else{
         AIturn=false;
 	}
-	board.setColor();
 	board.display();
 
 	while (ingameState == true) {

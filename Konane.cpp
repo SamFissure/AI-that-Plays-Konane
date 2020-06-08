@@ -1,54 +1,68 @@
 //various includes
 /*Order of Game Play*/
-		/* 1. determine who is first.
-		 * 2. choose to remove pieces if not first
-		 * 3. change board to reflect removed pieces
+		/* 1. determine who plays Black and is thus first.
+		 * 2. choose to remove 2 pieces if not first (another variant has the removal of one piece by each player).
+		 *
 		 *     **GAME LOOP**    *
-		 * 4. wait for input or make input
-		 * 5.
+		 * 3. wait for input or make input
+		 * 4. upon AI move:
+
 		 * run legalmove on each position in array when is turn (and board is accurate.)
 		 * N,S,E,W determines legalmove direction.
-		 *
-		 * if i<2 (row) don't run N,
+		 * 
+		 * the following bounds due to no move possible:
+		 * if i<2 (row) don't run N
 		 * if i>5 don't run S,
 		 *
 		 * if j<2 (column) don't run W,
 		 * if j>5 don't run E.
 		 *
-		 * so the first square in a column doesn't evaluate the Northern most move and the last square will ot
+		 * so the first square in a column doesn't evaluate the Northern most move and the last square will not
 		 * evaluate the Southernmost... etc
+		 * ******************* RECURSIVE CALLS  ***************************
+		 * 5. if legalmove returns true, form node (recursibe call with new board) with move and repeat process board to obtain number.
+		 * it is a DFS.
+		 * 6. the calls eventually reach depth d and the SEF is run.  It is notable that the alpha and beta cutoffs will reduce the number of boards evaluated 
+		 * WITHOUT any data loss.
+		 * (this is a less intuitive action of the recursive function, no data is lost, but branches that the AI will NEVER select are not explored further. 
+		 * essentially, a node which comes out too high or too low relative to the node examined will not be selected) 
 		 *
-		 * if legalmove returns true, form node with move and run SEF on board to obtain number.
-		 * continue breadth first or depth first?
-		 * since we are not starting out with pins in mind, we should focus on
-		 * stopping it at depth int d
-		 * SEF evaluates simply by counting legal moves for player in that state.
-		 * there may be some optimizations possible from this in terms of forming leaves...
+		 **************	State Evaluation function (SEF)*********************
 		 *
-		 * Iteration is accumplished by moving and then undoing the move
+		 * 7. The SEF evaluates partly by counting legal moves for player in that state.
+		 * Additionally, it counts pieces and estimates based on expected piece balance (each move must remove one piece, if more pieces are missing a 
+		 * double move has occurred.  The SEF assumes that this is always bad for the player who had this happen.)
 		 *
+		 * The SEF value is passed up to the top of the tree with varied modifications, minimizing levels take the lowest value to pass, maximizing 
+		 * will take up the largest values
 		 *
 		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
 		 */
+
+
+
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
+/*Include Constants*/
 #include "const.h"
 
 /*dynamic globals, may alter as needed*/
 
-/*AI FIRST*/
+/*AI FIRST?*/
 bool first;
-/*AI TURN*/
+/*AI TURN?*/
 int turn;
 
 //color is AI, humanColor is opponent
 int AIcolor, humanColor;
-
-
+/******************DUE TO FOLLOWING OFFICIAL RULES, COLOR CAN BE MERGED WITH FIRST AT A LATER TIME**********************/
+/***(setters and getters, removed from play at the moment)***/
 /*int getFirst{return first;}
-int getColor {return AIcolor;}
-int getPlayerColor {return playerColor;}
-int getDepth {return depth;}*/
+ *int getColor {return AIcolor;}
+ *int getPlayerColor {return playerColor;}
+ *int getDepth {return depth;}
+ */
+
 class board {
 	static const int B = 2;
 	static const int W = 1;
@@ -70,10 +84,7 @@ public:
 
 	/*SETTERS*/
 	void setValues(int b, int w,int x,int dir);
-	void setFirst();
-	void setColor();
-    int bestmove[4];
-    int playermove[4];
+	void setColor(); //NOW ALSO SETS FIRST
 	void display();
 	void manualOverride(); //piece removal, for fixing board errors and for setup.
 	bool isFull(int i, int j);
@@ -86,12 +97,10 @@ public:
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
     int SEF(int pass);
 	void selection(int S);
-	/*
-	int minimax(int level,int depth);
-	TODO make below functions
-	manualOverride
-	*/
 
+	//RECORDS MOVES BESTMOVE HOLDS FIRST MOVE AND THEN ANY MOVE THAT IS BETTER.
+	int bestmove[4];
+	int playermove[4];
 };
 
 
@@ -222,7 +231,7 @@ void board::selection(int S) {
 
 
 /***FOR SETUP, TESTING, AND MANUAL BOARD CORRECTIONS IF ERRORS MADE,***
-***ASSUMES SOME INTELLIGENCE ON PART OF USER***/
+ ***ASSUMES SOME INTELLIGENCE ON PART OF USER***/
 void board::manualOverride() {
 	int p = 0;
 	int i, j;
@@ -711,6 +720,7 @@ int board::SEF(int pass) {
 	int eb,pb, oPiece;
 	//pb=30;
 	//eb=(pb-(turn+pass));
+	//ABOVE NEEDS SOME WORK
     if(first){
        oPiece++;
     }
@@ -756,7 +766,7 @@ int board::SEF(int pass) {
 
 
 
-
+/*SHOULD CONSIDER MAKING MORE FUNCTIONS OUT OF THINGS IN MAIN!!*/
 int main() {
 
 	int Dir = 0;

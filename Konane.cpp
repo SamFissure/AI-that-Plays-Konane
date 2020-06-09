@@ -9,7 +9,7 @@
 
 		 * run legalmove on each position in array when is turn (and board is accurate.)
 		 * N,S,E,W determines legalmove direction.
-		 * 
+		 *
 		 * the following bounds due to no move possible:
 		 * if i<2 (row) don't run N
 		 * if i>5 don't run S,
@@ -22,18 +22,18 @@
 		 * ******************* RECURSIVE CALLS  ***************************
 		 * 5. if legalmove returns true, form node (recursibe call with new board) with move and repeat process board to obtain number.
 		 * it is a DFS.
-		 * 6. the calls eventually reach depth d and the SEF is run.  It is notable that the alpha and beta cutoffs will reduce the number of boards evaluated 
+		 * 6. the calls eventually reach depth d and the SEF is run.  It is notable that the alpha and beta cutoffs will reduce the number of boards evaluated
 		 * WITHOUT any data loss.
-		 * (this is a less intuitive action of the recursive function, no data is lost, but branches that the AI will NEVER select are not explored further. 
-		 * essentially, a node which comes out too high or too low relative to the node examined will not be selected) 
+		 * (this is a less intuitive action of the recursive function, no data is lost, but branches that the AI will NEVER select are not explored further.
+		 * essentially, a node which comes out too high or too low relative to the node examined will not be selected)
 		 *
 		 **************	State Evaluation function (SEF)*********************
 		 *
 		 * 7. The SEF evaluates partly by counting legal moves for player in that state.
-		 * Additionally, it counts pieces and estimates based on expected piece balance (each move must remove one piece, if more pieces are missing a 
+		 * Additionally, it counts pieces and estimates based on expected piece balance (each move must remove one piece, if more pieces are missing a
 		 * double move has occurred.  The SEF assumes that this is always bad for the player who had this happen.)
 		 *
-		 * The SEF value is passed up to the top of the tree with varied modifications, minimizing levels take the lowest value to pass, maximizing 
+		 * The SEF value is passed up to the top of the tree with varied modifications, minimizing levels take the lowest value to pass, maximizing
 		 * will take up the largest values
 		 *
 		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
@@ -52,7 +52,7 @@
 bool first;
 /*AI TURN?*/
 int turn;
-
+bool zpgame=false;
 //color is AI, humanColor is opponent
 int AIcolor, humanColor;
 /******************DUE TO FOLLOWING OFFICIAL RULES, COLOR CAN BE MERGED WITH FIRST AT A LATER TIME**********************/
@@ -64,11 +64,6 @@ int AIcolor, humanColor;
  */
 
 class board {
-	static const int B = 2;
-	static const int W = 1;
-
-	/*set the Static ints before compile,
-	fine tune as needed with each compile*/
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B},
@@ -145,7 +140,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							}
 							cout << val;
 							alpha = max(alpha, val);
-
+							//Alpha cutoff
 							if (beta <= alpha) {
 								return alpha;
 							}
@@ -188,6 +183,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							unmakeMove(currentmove, humanColor, AIcolor);
 							// Alpha Beta Pruning
 							if (beta <= alpha) {
+                                    //Beta cutoff
 								return beta;
 							}
 						}
@@ -269,7 +265,7 @@ void board::manualOverride() {
 }
 
 
-/***NEEDED FOR FIRST TURN, NOT NEEDED AFTER
+/***LEGACY, MAY BE USEFUL AT A FUTURE DATE
 void board::setFirst() {
 	int select=0;
 	char ans;
@@ -556,7 +552,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 			if (state == false) {
                 currentmove[0] = i;
                 currentmove[1] = j;
-                currentmove[2] = k;display();
+                currentmove[2] = k;
                 currentmove[3] = m;
                     if(m<6){
                         m++;
@@ -759,7 +755,7 @@ int board::SEF(int pass) {
 
 		}
 	}
-   cout<<"SEF EXECUTED ON BELOW BOARD";
+   cout<<"SEF EXECUTED ON BELOW BOARD\n";
    display();
     return (sum+(pb-eb));
 }
@@ -774,10 +770,7 @@ int main() {
 	int level=0;
 	int jokes;
 	//odd numbered depths are on min nodes, even on max.
-	int depth, setdepth;
-	cout<<"Set Depth?\n";
-	cin>>depth;
-	setdepth=depth;
+	cout<<"depth = "<< depth<<". (This should be an even number)\n";
 	cout<<"\n";
 	bool AIturn, ingameState;
 	ingameState = true;
@@ -806,6 +799,7 @@ int main() {
 			cin >> ans;
 		}
 		if (AIturn == true) {
+                //ERROR ON FIRST AND SECOND PARAMETERS?
 			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
             if (state == LOSE_GAME)
@@ -831,10 +825,40 @@ int main() {
 			}
 			board.display();
 			AIturn = false;
+			turn++;
+            }
+            else if((zpgame==true) && (AIturn==false)){
+						state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
+			board.display();
+			if (state == LOSE_GAME)
+			{
+				//LOSE FIX IN MINMAX
+				cout << "I think I just lost.  If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
+
+			}
+			else if (state== WIN)
+			{
+				cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
+				board.makeMove(board.bestmove, humanColor);
+			}
+			else if (state == LOSE)
+			{
+				cout << "It looks like I will lose soon, but we should play it out.\n";
+				board.makeMove(board.bestmove, humanColor);
+			}
+			else {
+				board.makeMove(board.bestmove, humanColor);
+				cout<<board.bestmove[0]+1<<", "<<board.bestmove[1]+1<<", to "<<board.bestmove[2]+1<<", "<<board.bestmove[3]+1<<", \n your move\n ";
+
+			}
+			board.display();
+			AIturn = false;
+			turn++;
             }
 		else {
 			cout << "\nenter piece to move column, 1-8: ";
 			cin >> j;
+			//accomodate indexing
 			j--;
 			board.bestmove[1]=j;
 			cout << "\nenter piece to move row, 1-8: ";

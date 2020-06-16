@@ -24,3 +24,8 @@ some global constants MAY become class-member variables.  Other alterations will
 3. the SEF will be enhanced to fix some outputted values that are unexpected.
 4. Code may be refactored to include more recursion where applicable.
 5. The program will be better timed out so as to verify performance, though the 15 second requirement will be dropped.
+
+:::TODO:::
+FIX BIG O ISSUE.  It takes far too long to make a move mid-game.
+ZERO PLAYER GAME. There will have to be a complete refactor to make this work properly. 
+For now, the ZPG implementation will be put off.

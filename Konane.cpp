@@ -172,6 +172,9 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
+							for (int z = 0; z < 4; z++) {
+								cout << " " << currentmove[z] + 1 << " ";
+							}
 
 							makeMove(currentmove, humanColor);
 							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, AIcolor, true));
@@ -705,22 +708,26 @@ the utility(best/worst) value of the node is returned.
 */
 
 
-/*Because Konane is lost when there are no moves, the SEF needs only to find the board with a difference in moves that is
- *higher than another to determine if it is a worthwhile choice.  The sum is lower when the opponent has more moves and
- *higher when the AI has more moves.
- *In a typical game, the SEFs chosen by AI should initially range from -2 to 2, if first player it should trend higher,
- *otherwise, lower (second player always has less moves to start).
- */
+
 
 
 int board::SEF(int pass) {
 	int sum=0;
+	int eb,pb, oPiece;
+	//pb=30;
+	//eb=(pb-(turn+pass));
+	//ABOVE NEEDS SOME WORK
+    if(first){
+       oPiece++;
+    }
+    else{pb++;}
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = calibrate(i, AIcolor); j < 8; j++)
 		{
 			if (board[i][j] > 0)
 			{
+			    pb++;
 				for (int Dir = 0; Dir < 4; Dir++) {
 					if (legal_SEF(i, j, Dir)) {
 						sum++;
@@ -737,9 +744,10 @@ int board::SEF(int pass) {
 		{
 			if (board[i][j] > 0)
 			{
+			    oPiece++;
 				for (int Dir = 0; Dir < 4; Dir++) {
 					if (legal_SEF(i, j, Dir)) {
-						sum--;
+						sum++;
 					}
 				}
 
@@ -749,7 +757,7 @@ int board::SEF(int pass) {
 	}
    cout<<"SEF EXECUTED ON BELOW BOARD\n";
    display();
-    return (sum);
+    return (sum+(pb-eb));
 }
 
 
@@ -792,7 +800,7 @@ int main() {
 		}
 		if (AIturn == true) {
                 //ERROR ON FIRST AND SECOND PARAMETERS?
-			state=board.alphaBetaMinimax(MIN, MAX, level, depth, AIcolor, true);
+			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
             if (state == LOSE_GAME)
 			{

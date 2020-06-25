@@ -1,5 +1,5 @@
-//various includes
 /*Order of Game Play*/
+/*Game is lost when there are no longer any valid moves.*/
 		/* 1. determine who plays Black and is thus first.
 		 * 2. choose to remove 2 pieces if not first (another variant has the removal of one piece by each player).
 		 *

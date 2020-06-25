@@ -54,6 +54,7 @@ bool first;
 int turn;
 bool zpgame=false;
 //color is AI, humanColor is opponent
+/***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
 int AIcolor, humanColor;
 /******************DUE TO FOLLOWING OFFICIAL RULES, COLOR CAN BE MERGED WITH FIRST AT A LATER TIME**********************/
 /***(setters and getters, removed from play at the moment)***/
@@ -99,7 +100,9 @@ public:
 };
 
 
-/*ALPHABETA MINIMAX BELOW*/
+/***ALPHABETA MINIMAX BELOW***/
+
+/***NEEDS FULL REFACTOR FOR THE PURPOSE OF ZERO PLAYER GAME***/
 int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing)
 {
 	int temp;
@@ -228,6 +231,7 @@ void board::selection(int S) {
 
 /***FOR SETUP, TESTING, AND MANUAL BOARD CORRECTIONS IF ERRORS MADE,***
  ***ASSUMES SOME INTELLIGENCE ON PART OF USER***/
+ /***ZERO PLAYER GAME COMPATIBLE***/
 void board::manualOverride() {
 	int p = 0;
 	int i, j;
@@ -291,7 +295,8 @@ void board::setFirst() {
 }
 ***/
 
-/***CRITICAL FOR ENTIRE GAME, SET COLOR AND FIRST GLOBALS HERE***/
+/***  CRITICAL FOR ENTIRE GAME, SET COLOR AND FIRST GLOBALS HERE  ***/
+/***GIVEN CURRENT USAGE, IS NOT INCOMPATIBLE WITH ZERO PLAYER GAME***/
 void board::setColor() {
     char ans='n';
     while (ans != 'y') {
@@ -321,6 +326,7 @@ void board::setColor() {
 
 
 /***SPACE TEST FOR PRESENCE OF PIECE***/
+/***       COLOR AGNOSTIC           ***/
 bool board::isFull(int i, int j) {
 
 	if (board[i][j] == 0){
@@ -345,7 +351,7 @@ int board::calibrate(int i, int playerColor)
 }
 
 
-/***FAIRLY STANDARD DISPLAY FUNCTION***/
+/***FAIRLY SIMPLE DISPLAY FUNCTION***/
 void board::display() {
 	int row = 0;
 	cout << "   A B C D E F G H \n";
@@ -372,8 +378,12 @@ void board::display() {
 	}
 }
 
-/***TESTS LEGALITY OF MOVE***/
-//NOT TESTED YET!!!  MAY WANT TO REFACTOR!
+/***       TESTS LEGALITY OF MOVE FOR SEF        ***/
+
+/***State Evaluation form of Legal Move.         ***
+*** Exists for the purposes of tallying possible ***
+*** moves, this is sufficient a refactor         ***
+*** may be desirable.  ZERO PLAYER GAME AGNOSTIC ***/
 bool board::legal_SEF(int i, int j, int Dir)
 {
 	int k = i;
@@ -441,7 +451,9 @@ bool board::legal_SEF(int i, int j, int Dir)
 	return false;
 }
 
-/***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED***/
+/***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED      ***
+ ***MESSY, REFACTOR IF TIME, IT IS COLOR AGNOSTIC     ***/
+
 bool board::legal_move(int currentmove[], int i, int j, int Dir)
 {
     bool state;
@@ -576,8 +588,9 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 	return false;
 }
 /***ASSUMES LEGAL MOVE HAS BEEN EXECUTED,***
-****MAKES MOVE RECORDED BY LEGAL MOVE***
-****MAY BE REFACTORED INTO LEGAL MOVE (NON SEF)***/
+ ***MAKES MOVE RECORDED BY LEGAL MOVE    ***/
+
+/** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME **/
 void board::makeMove(int currentmove[], int playerColor)
 {   cout<<"making move\n";
     int i,j,k,m;
@@ -635,7 +648,7 @@ void board::makeMove(int currentmove[], int playerColor)
     return;
 }
 
-
+/**UNMAKE MOVE IS COLOR-AGNOSTIC, ZERO PLAYER GAME WILL NOT REQUIRE A CHANGE HERE**/
 
 void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
     int i,j,k,m;
@@ -691,15 +704,14 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 }
 }
 
+/**DEBRIS COMMENTS, NEED TO RECONCILE WITH CURRENT VERSION**/
 	/*AI Game Playing Functions, in a loop every turn
 	void ABmax();		//maximizer for AI sim, may want it to be separate from this class?
 	void ABmin();       //minimizer for AI sim, may want it to be separate from this class?
 	Make a move in-game
 	void chosenMove();  //states move chosen, implements... probably unneccessary*/
 
-	/*    if(first){
-        pb
-    }
+	/*
 The minimax algorithm begins at the current state of the game recursively searching the
 game tree for the optimal move depth-first, which means exploring a branch as far as it goes and
 then backtracking until a path that has not been explored is found. Once the algorithm reaches a
@@ -709,7 +721,7 @@ the utility(best/worst) value of the node is returned.
 
 
 
-
+/**TO ACHIEVE ZERO PLAYER GAME, THE SEF NEEDS EDITS**/
 
 int board::SEF(int pass) {
 	int sum=0;

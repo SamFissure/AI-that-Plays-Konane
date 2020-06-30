@@ -56,12 +56,12 @@ bool zpgame=false;
 //color is AI, humanColor is opponent
 /***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
 int AIcolor, humanColor;
-/******************DUE TO FOLLOWING OFFICIAL RULES, COLOR CAN BE MERGED WITH FIRST AT A LATER TIME**********************/
-/***(setters and getters, removed from play at the moment)***/
-/*int getFirst{return first;}
- *int getColor {return AIcolor;}
- *int getPlayerColor {return playerColor;}
- *int getDepth {return depth;}
+/******************DUE TO FOLLOWING OFFICIAL RULES, COLOR HAS BEEN MERGED WITH FIRST**********************/
+/***(setters and getters, removed from code at the moment)***/
+/*int getFirst(){return first;}
+ *int getColor() {return AIcolor;}
+ *int getPlayerColor() {return playerColor;}
+ *int getDepth() {return depth;}
  */
 
 class board {
@@ -105,15 +105,17 @@ public:
 /***NEEDS FULL REFACTOR FOR THE PURPOSE OF ZERO PLAYER GAME***/
 int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing)
 {
-	int temp;
-	int k, m, tshoot;
+	int k, m, tshoot, temp;
 	/* Initial values of
 	 * Alpha and Beta
 	 * Terminating condition. i.e
 	 *leaf node, is reached*/
+    int opColor = levelColor%2;
+    opColor++;
+    /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
 	int currentmove[4];
 	if (level == depth) {
-			tshoot = SEF(depth);
+			tshoot = SEF(levelColor);
 			cout << "\nSEF= " << tshoot << "\n";
 			return tshoot;
 	}
@@ -123,18 +125,18 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 
 		for (int i = 0; i < 8; i++)
 		{
-			for (int j = calibrate(i, AIcolor); j < 8; j = j + 2)
+			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 			{
 				if (board[i][j] > 0)
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
 							/*****MOVE PIECE*****/
-							makeMove(currentmove, AIcolor);
-							//calls for minimization using the human color
+							makeMove(currentmove, levelColor);
+							//calls for minimization using the opposing color
 							temp = val;
-							val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, humanColor, false));
-							unmakeMove(currentmove, AIcolor, humanColor);
+							val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
+							unmakeMove(currentmove, levelColor, opColor);
 							if (level == 0 && temp <= val) {
 								bestmove[0] = currentmove[0];
 								bestmove[1] = currentmove[1];
@@ -169,7 +171,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		int val = MAX;
 		for (int i = 0; i < 8; i++)
 		{
-			for (int j = calibrate(i, humanColor); j < 8; j = j + 2)
+			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 			{
 				if (board[i][j] > 0)
 				{
@@ -179,11 +181,11 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 								cout << " " << currentmove[z] + 1 << " ";
 							}
 
-							makeMove(currentmove, humanColor);
-							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, AIcolor, true));
+							makeMove(currentmove, levelColor);
+							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
 							//best = min(best, val);
 							beta = min(beta, val);
-							unmakeMove(currentmove, humanColor, AIcolor);
+							unmakeMove(currentmove, levelColor, opColor);
 							// Alpha Beta Pruning
 							if (beta <= alpha) {
                                     //Beta cutoff
@@ -723,19 +725,21 @@ the utility(best/worst) value of the node is returned.
 
 /**TO ACHIEVE ZERO PLAYER GAME, THE SEF NEEDS EDITS**/
 
-int board::SEF(int pass) {
+int board::SEF(int playerColor) {
 	int sum=0;
-	int eb,pb, oPiece;
+	int eb=0;
+	int pb=0;
+	int oPiece=0;
 	//pb=30;
 	//eb=(pb-(turn+pass));
 	//ABOVE NEEDS SOME WORK
-    if(first){
-       oPiece++;
-    }
-    else{pb++;}
+	int opColor = playerColor%2;
+	opColor++;
+	if (first){pb++;}
+	else{oPiece++;}
 	for (int i = 0; i < 8; i++)
 	{
-		for (int j = calibrate(i, AIcolor); j < 8; j++)
+		for (int j = calibrate(i, playerColor); j < 8; j++)
 		{
 			if (board[i][j] > 0)
 			{
@@ -752,14 +756,14 @@ int board::SEF(int pass) {
 	}
 	for (int i = 0; i < 8; i++)
 	{
-		for (int j = calibrate(i, humanColor); j < 8; j++)
+		for (int j = calibrate(i, opColor); j < 8; j++)
 		{
 			if (board[i][j] > 0)
 			{
 			    oPiece++;
 				for (int Dir = 0; Dir < 4; Dir++) {
 					if (legal_SEF(i, j, Dir)) {
-						sum++;
+						sum--;
 					}
 				}
 
@@ -769,7 +773,7 @@ int board::SEF(int pass) {
 	}
    cout<<"SEF EXECUTED ON BELOW BOARD\n";
    display();
-    return (sum+(pb-eb));
+    return (sum+(pb-oPiece));
 }
 
 

@@ -52,7 +52,7 @@
 bool first;
 /*AI TURN?*/
 int turn;
-bool zpgame=false;
+bool zpgame=true;
 //color is AI, humanColor is opponent
 /***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
 int AIcolor, humanColor;
@@ -726,20 +726,19 @@ the utility(best/worst) value of the node is returned.
 /**TO ACHIEVE ZERO PLAYER GAME, THE SEF NEEDS EDITS**/
 
 int board::SEF(int playerColor) {
-	int sum=0;
-	int eb=0;
-	int pb=0;
-	int oPiece=0;
+	int sum=0;    //sum of total moves for SEF player
+	int eb=0;     //deprecated but potentially useful
+	int pb=0;     //Player pieces
+	int oPiece=0; //Opponent pieces
 	//pb=30;
 	//eb=(pb-(turn+pass));
 	//ABOVE NEEDS SOME WORK
 	int opColor = playerColor%2;
 	opColor++;
-	if (first){pb++;}
-	else{oPiece++;}
+	/**PIECE BALANCE ADJUSTMENT MAy BE NEEDED BASED ON WHO IS FIRST IF PLAYER IS SECOND, INCREMENT PIECES**/
 	for (int i = 0; i < 8; i++)
 	{
-		for (int j = calibrate(i, playerColor); j < 8; j++)
+		for (int j = calibrate(i, playerColor); j < 8; j = j + 2)
 		{
 			if (board[i][j] > 0)
 			{
@@ -756,7 +755,7 @@ int board::SEF(int playerColor) {
 	}
 	for (int i = 0; i < 8; i++)
 	{
-		for (int j = calibrate(i, opColor); j < 8; j++)
+		for (int j = calibrate(i, opColor); j < 8; j = j + 2)
 		{
 			if (board[i][j] > 0)
 			{
@@ -868,7 +867,7 @@ int main() {
 
 			}
 			board.display();
-			AIturn = false;
+			AIturn = true;
 			turn++;
             }
 		else {

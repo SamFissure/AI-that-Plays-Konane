@@ -27,5 +27,4 @@ some global constants MAY become class-member variables.  Other alterations will
 
 :::TODO:::
 FIX BIG O ISSUE.  It takes far too long to make a move mid-game.
-ZERO PLAYER GAME. There will have to be a complete refactor to make this work properly. 
-For now, the ZPG implementation will be put off.
+ZERO PLAYER GAME. The ZPG seems to function.  Big-O problems must be fixed for futher testing.

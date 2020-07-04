@@ -1,6 +1,6 @@
 # Konane AI 
 # Made by Tafroze and Sam (Robert).
-A.I. that plays Konane.
+A.I. that plays Konane at a high level of expertise
 --------------------------------------------------------------------------------
 AS OF 3/25/2020 THE COMPETITION HAS PASSED AND THIS IS PURE HOBBYIST!!
 __________________________________________________________________________________________________________________________________

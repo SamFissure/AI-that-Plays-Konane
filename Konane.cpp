@@ -43,13 +43,12 @@
 
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
+/**INCLUDE PARALELL PROCESSING**/
 /*Include Constants*/
 #include "const.h"
 
 /*dynamic globals, may alter as needed*/
 
-/*AI FIRST?*/
-bool first;
 /*AI TURN?*/
 int turn;
 bool zpgame=true;
@@ -80,7 +79,7 @@ public:
 
 	/*SETTERS*/
 	void setValues(int b, int w,int x,int dir);
-	void setColor(); //NOW ALSO SETS FIRST
+	bool setColor(); //returns first and color
 	void display();
 	void manualOverride(); //piece removal, for fixing board errors and for setup.
 	bool isFull(int i, int j);
@@ -271,36 +270,12 @@ void board::manualOverride() {
 }
 
 
-/***LEGACY, MAY BE USEFUL AT A FUTURE DATE
-void board::setFirst() {
-	int select=0;
-	char ans;
-	while (ans != 'y') {
-		cout << "who is first? \n select 1 for AI and 2 for opponent: ";
-		cin >> select;
-		if (select == 2)
-		{
-		first = false;
-		cout << "\nYou go first";
-		}
-		else if (select == 1)
-		{
-			first = true;
-			cout << "\n 'I' go first";
-		}
-		else {
-			cout << "\nerror";
-		}
-		cout << "\nIs this correct? y for yes";
-		cin >> ans;
-	}
-}
-***/
 
 /***  CRITICAL FOR ENTIRE GAME, SET COLOR AND FIRST GLOBALS HERE  ***/
 /***GIVEN CURRENT USAGE, IS NOT INCOMPATIBLE WITH ZERO PLAYER GAME***/
-void board::setColor() {
+bool board::setColor() {
     char ans='n';
+    bool first;
     while (ans != 'y') {
 
 		cout << "\n What color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules)";
@@ -324,6 +299,7 @@ void board::setColor() {
         cout << "\nIs this correct? y for yes";
 		cin >> ans;
 	}
+	return first;
 }
 
 
@@ -784,6 +760,7 @@ int main() {
 	int i,j,k,m, alpha, beta, state;
 	int level=0;
 	int jokes;
+	bool first;
 	//odd numbered depths are on min nodes, even on max.
 	cout<<"depth = "<< depth<<". (This should be an even number)\n";
 	cout<<"\n";
@@ -797,7 +774,7 @@ int main() {
 	if (jokes == 3) {
 		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
-	board.setColor();
+	first=board.setColor();
 	if (first == true) {
 		AIturn = true;
 	}

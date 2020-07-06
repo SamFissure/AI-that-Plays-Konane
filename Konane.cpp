@@ -62,7 +62,21 @@ int AIcolor, humanColor;
  *int getPlayerColor() {return playerColor;}
  *int getDepth() {return depth;}
  */
+class fluff{
+public:
+    void jokes();
 
+};
+void fluff::jokes()
+{
+    int jokes;
+    cout << "Would you like to play a game? \n";
+	cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
+	cin >> jokes;
+	if (jokes == 3) {
+		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
+	}
+}
 class board {
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W},
@@ -278,25 +292,25 @@ bool board::setColor() {
     bool first;
     while (ans != 'y') {
 
-		cout << "\n What color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules)";
+		cout << "\nWhat color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules \n black is X, white is O)\n ";
         cin >> AIcolor;
 
         if (AIcolor == 2)
         {
             humanColor = 1;
             first = true;
-        cout<< "\n I play as black and go first.";
+        cout<< "\nI play as black and go first.";
         }
         else if (AIcolor == 1)
         {
             humanColor = 2;
             first = false;
-            cout<< "\n I play as white and go second.";
+            cout<< "\nI play as white and go second.";
         }
         else {
             cout << "\nerror, restarting";
         }
-        cout << "\nIs this correct? y for yes";
+        cout << "\nIs this correct? y for yes:\n";
 		cin >> ans;
 	}
 	return first;
@@ -757,23 +771,19 @@ int board::SEF(int playerColor) {
 int main() {
 
 	int Dir = 0;
-	int i,j,k,m, alpha, beta, state;
 	int level=0;
-	int jokes;
-	bool first;
+	int i,j,k,m, alpha, beta, state;
+
+    char correct, ans;
+	bool first, AIturn, ingameState;;
+	fluff fluff;
+	board board;
 	//odd numbered depths are on min nodes, even on max.
 	cout<<"depth = "<< depth<<". (This should be an even number)\n";
 	cout<<"\n";
-	bool AIturn, ingameState;
 	ingameState = true;
-	char correct, ans;
-	board board;
-	cout << "Would you like to play a game? \n";
-	cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
-	cin >> jokes;
-	if (jokes == 3) {
-		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
-	}
+
+	fluff.jokes();
 	first=board.setColor();
 	if (first == true) {
 		AIturn = true;

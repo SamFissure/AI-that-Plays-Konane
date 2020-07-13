@@ -9,5 +9,5 @@ static const int LOSE = -300;
 static const int WIN = 300;
 static const int B = 2;
 static const int W = 1;
-static const int depth = 8;
+static const int depth = 6;
 #endif

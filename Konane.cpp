@@ -46,7 +46,7 @@
 /**INCLUDE PARALELL PROCESSING**/
 /*Include Constants*/
 #include "const.h"
-
+/**REMEMBER TO USE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
 /*dynamic globals, may alter as needed*/
 
 /*AI TURN?*/
@@ -593,7 +593,7 @@ void board::makeMove(int currentmove[], int playerColor)
 	m = currentmove[3];
 	cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
 	neq = true;
-    while (neq){
+    do {
     board[i][j] = 0;
 
     if (k < i)
@@ -601,42 +601,27 @@ void board::makeMove(int currentmove[], int playerColor)
         board[i - 1][j] = 0;
         board[i - 2][j] = playerColor;
         i=i-2;
-        if(k==i)
-        {
-        break;
-        }
     }
     if (k > i)
     {
         board[i + 1][j] = 0;
         board[i + 2][j] = playerColor;
         i=i+2;
-        if(k==i)
-        {
-        break;
-        }
     }
     if (m < j)
     {
         board[i][j - 1] = 0;
         board[i][j - 2] = playerColor;
         j=j-2;
-        if(m==j)
-        {
-        break;
-        }
     }
     if (m > j)
     {
         board[i][j + 1] = 0;
         board[i][j + 2] = playerColor;
         j=j+2;
-        if(m==j)
-        {
-        break;
-        }
     }
-    }
+    if((i==k)&&(m==j)){neq=false;}
+    } while (neq);
     return;
 }
 
@@ -760,8 +745,8 @@ int board::SEF(int playerColor) {
 
 		}
 	}
-   cout<<"SEF EXECUTED ON BELOW BOARD\n";
-   display();
+   //cout<<"SEF EXECUTED ON BELOW BOARD\n";
+   //display();
     return (sum+(pb-oPiece));
 }
 

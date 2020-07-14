@@ -164,23 +164,29 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							}
 						}
 					}
+
 				}
 			}
 		}
 		//if no change to value, no legal moves
+        if (level == 0 && val == MIN && levelColor == 1)
+		{
+			return GAME_OVER_WHITE;
+		}
+        if (level == 0 && val == MIN && levelColor == 2)
+		{
+			return GAME_OVER_BLACK;
+		}
 		if (val == MIN)
 		{
 			return LOSE;
 		}
-		if (level == 0 && val == 0)
-		{
-			return LOSE_GAME;
-		}
+
 		return val;
 	}
 	else
 	{
-		cout << "minimizing \n";
+		//cout << "minimizing \n";
 		int val = MAX;
 		for (int i = 0; i < 8; i++)
 		{
@@ -190,9 +196,11 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
+                                cout << "\n ";
 							for (int z = 0; z < 4; z++) {
-								cout << " " << currentmove[z] + 1 << " ";
+								cout << currentmove[z] + 1;
 							}
+                            cout << "\n ";
 
 							makeMove(currentmove, levelColor);
 							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
@@ -579,19 +587,21 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 	//if no move at all
 	return false;
 }
+
+
 /***ASSUMES LEGAL MOVE HAS BEEN EXECUTED,***
- ***MAKES MOVE RECORDED BY LEGAL MOVE    ***/
+/***MAKES MOVE RECORDED BY LEGAL MOVE    ***/
 
 /** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME **/
 void board::makeMove(int currentmove[], int playerColor)
-{   cout<<"making move\n";
+{   //cout<<"making move\n";
     int i,j,k,m;
     bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
-	cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
+	//cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
 	neq = true;
     do {
     board[i][j] = 0;
@@ -636,7 +646,7 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 	m = currentmove[3];
 
 	while (neq){
-        cout << "\nunmaking move: ";
+        //cout << "\nunmaking move: ";
 		board[k][m] = 0;
 		if (k > i)
 		{
@@ -814,6 +824,7 @@ int main() {
 			AIturn = false;
 			turn++;
             }
+            /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             else if((zpgame==true) && (AIturn==false)){
 						state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
 			board.display();
@@ -842,6 +853,7 @@ int main() {
 			AIturn = true;
 			turn++;
             }
+            /** if PLAYING A HUMAN**/
 		else {
 			cout << "\nenter piece to move column, 1-8: ";
 			cin >> j;
@@ -866,8 +878,21 @@ int main() {
 			turn++;
 			AIturn=true;
 		}
-            cout << "\n is board correct? y for yes, n for no \n \n";
-			cin >> ans;
+        cout<<  "\n assuming correct board and continue";
+        if(state==GAME_OVER_BLACK)
+            {
+                cout<<"Black Loses\n";
+                cin>>ans;
+            break;
+            }
+        if(state==GAME_OVER_WHITE)
+            {
+                cout<<"White Loses\n";
+                cin>>ans;
+                break;
+            }
+        //cout << "\n is board correct? y for yes, n for no \n \n";
+        //cin >> ans;
 	}
 	return 0;
 }

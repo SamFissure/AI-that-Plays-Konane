@@ -106,6 +106,7 @@ public:
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
     int SEF(int pass);
 	void selection(int S);
+	void displayMove();
 
 	//RECORDS MOVES BESTMOVE HOLDS FIRST MOVE AND THEN ANY MOVE THAT IS BETTER.
 	int bestmove[4];
@@ -129,7 +130,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	int currentmove[4];
 	if (level == depth) {
 			tshoot = SEF(levelColor);
-			cout << "\nSEF= " << tshoot << "\n";
+			//cout << "\nSEF= " << tshoot << "\n";
 			return tshoot;
 	}
 	else if (maximizing == true)
@@ -158,7 +159,6 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 								bestmove[2] = currentmove[2];
 								bestmove[3] = currentmove[3];
 							}
-							cout << val;
 							alpha = max(alpha, val);
 							//Alpha cutoff
 							if (beta <= alpha) {
@@ -184,7 +184,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 			return LOSE;
 		}
 
-		return val;
+    return val;
 	}
 	else
 	{
@@ -198,11 +198,12 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
-                                cout << "\n ";
+                            /*    cout << "\n ";
 							for (int z = 0; z < 4; z++) {
 								cout << currentmove[z] + 1;
 							}
                             cout << "\n ";
+                            */
 
 							makeMove(currentmove, levelColor);
 							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
@@ -378,7 +379,12 @@ void board::display() {
 		cout << "\n";
 	}
 }
-
+void board::displayMove(){
+cout<<"\n"<<bestmove[0]+1<<", ";
+cout<<bestmove[1]+1<<", to ";
+cout<<bestmove[2]+1<<", ";
+cout<<bestmove[3]+1<<", \n your move\n ";
+}
 /***       TESTS LEGALITY OF MOVE FOR SEF        ***/
 
 /***State Evaluation form of Legal Move.         ***
@@ -800,25 +806,33 @@ int main() {
                 //ERROR ON FIRST AND SECOND PARAMETERS?
 			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
-            if (state == LOSE_GAME)
-			{
-				//LOSE FIX IN MINMAX
-				cout << "I think I just lost.  If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
-
-			}
-			else if (state== WIN)
-			{
-				cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
-				board.makeMove(board.bestmove, AIcolor);
-			}
+            if(state==GAME_OVER_BLACK)
+            {
+            cout<<"Black Loses\n";
+            cin>>ans;
+            break;
+            }
+        if(state==GAME_OVER_WHITE)
+            {
+            cout<<"White Loses\n";
+            cin>>ans;
+            break;
+            }
+        if (state== WIN)
+        {
+            cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
+            board.makeMove(board.bestmove, AIcolor);
+            board.displayMove();
+        }
 			else if (state == LOSE)
 			{
 				cout << "It looks like I will lose soon, but we should play it out.\n";
 				board.makeMove(board.bestmove, AIcolor);
+				board.displayMove();
 			}
 			else {
 				board.makeMove(board.bestmove, AIcolor);
-				cout<<board.bestmove[0]+1<<", "<<board.bestmove[1]+1<<", to "<<board.bestmove[2]+1<<", "<<board.bestmove[3]+1<<", \n your move\n ";
+				board.displayMove();
 
 			}
 			board.display();
@@ -827,29 +841,36 @@ int main() {
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             else if((zpgame==true) && (AIturn==false)){
-						state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
+            state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
 			board.display();
-			if (state == LOSE_GAME)
-			{
-				//LOSE FIX IN MINMAX
-				cout << "I think I just lost.  If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
-
-			}
-			else if (state== WIN)
+            if(state==GAME_OVER_BLACK)
+            {
+            cout<<"Black Loses\n";
+            cin>>ans;
+            break;
+            }
+            if(state==GAME_OVER_WHITE)
+            {
+            cout<<"White Loses\n";
+            cin>>ans;
+                break;
+            }
+			if (state== WIN)
 			{
 				cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
 				board.makeMove(board.bestmove, humanColor);
+				board.displayMove();
 			}
 			else if (state == LOSE)
 			{
-				cout << "It looks like I will lose soon, but we should play it out.\n";
+				cout << "It looks like I will lose soon. If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
 				board.makeMove(board.bestmove, humanColor);
+				board.displayMove();
 			}
 			else {
 				board.makeMove(board.bestmove, humanColor);
-				cout<<board.bestmove[0]+1<<", "<<board.bestmove[1]+1<<", to "<<board.bestmove[2]+1<<", "<<board.bestmove[3]+1<<", \n your move\n ";
-
-			}
+				board.displayMove();
+				}
 			board.display();
 			AIturn = true;
 			turn++;
@@ -875,21 +896,22 @@ int main() {
 			board.bestmove[2]=k;
 
 			board.makeMove(board.bestmove,humanColor);
+			board.displayMove();
 			board.display();
 			turn++;
 			AIturn=true;
-		}
-        cout<<  "\n assuming correct board and continue";
+			}
+        cout<<  "\n assuming correct board and continue\n";
         if(state==GAME_OVER_BLACK)
             {
-                cout<<"Black Loses\n";
-                cin>>ans;
+            cout<<"Black Loses\n";
+            cin>>ans;
             break;
             }
         if(state==GAME_OVER_WHITE)
             {
-                cout<<"White Loses\n";
-                cin>>ans;
+            cout<<"White Loses\n";
+            cin>>ans;
                 break;
             }
         //cout << "\n is board correct? y for yes, n for no \n \n";

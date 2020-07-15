@@ -43,10 +43,10 @@
 
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
-/**INCLUDE PARALELL PROCESSING**/
+/**INCLUDE PARALELL PROCESSING??**/
 /*Include Constants*/
 #include "const.h"
-/**REMEMBER TO USE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
+/**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
 /*dynamic globals, may alter as needed*/
 
 /*AI TURN?*/
@@ -150,7 +150,9 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							temp = val;
 							val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
 							unmakeMove(currentmove, levelColor, opColor);
-							if (level == 0 && temp <= val) {
+							/**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
+							/**IF CURRENT MOVE BEST, CHANGE MOVE**/
+							if (level == 0 && temp < val) {
 								bestmove[0] = currentmove[0];
 								bestmove[1] = currentmove[1];
 								bestmove[2] = currentmove[2];
@@ -168,7 +170,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 				}
 			}
 		}
-		//if no change to value, no legal moves
+		/**Program can predict loss, and will end properly if loss.**/
         if (level == 0 && val == MIN && levelColor == 1)
 		{
 			return GAME_OVER_WHITE;
@@ -204,7 +206,6 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 
 							makeMove(currentmove, levelColor);
 							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
-							//best = min(best, val);
 							beta = min(beta, val);
 							unmakeMove(currentmove, levelColor, opColor);
 							// Alpha Beta Pruning

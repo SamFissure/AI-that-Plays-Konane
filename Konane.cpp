@@ -50,6 +50,7 @@
 /*dynamic globals, may alter as needed*/
 
 /*AI TURN?*/
+/**FUNCTIONAL WITH 14 DEPTH, EASE OF TESTING AT 12 OR 10 DEPTH, GAMEPLAY IS DIFFERENT DEPENDING ON DEPTH**/
 int turn;
 bool zpgame=true;
 //color is AI, humanColor is opponent
@@ -65,8 +66,9 @@ int AIcolor, humanColor;
 class fluff{
 public:
     void jokes();
-
+    void detectWL(int value);
 };
+
 void fluff::jokes()
 {
     int jokes;
@@ -77,6 +79,8 @@ void fluff::jokes()
 		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
 }
+void fluff::detectWL(int value){}
+
 class board {
 	int board[8][8] = {
 		{B,W,B,W,B,W,B,W},
@@ -260,7 +264,10 @@ void board::selection(int S) {
 void board::manualOverride() {
 	int p = 0;
 	int i, j;
-	char remadd;
+	char remadd, ans;
+			while (ans != 'y') {
+            display();
+
 	cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
 	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
 	cin >> remadd;
@@ -287,10 +294,14 @@ void board::manualOverride() {
                 cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
                 cin >> remadd;
 			}
-	display();
-	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
-	cin >> remadd;
+        display();
+        cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+        cin >> remadd;
 	}
+    display();
+    cout << "\n is board correct? y for yes, n for no \n \n";
+	cin >> ans;
+}
 }
 
 
@@ -383,7 +394,7 @@ void board::displayMove(){
 cout<<"\n"<<bestmove[0]+1<<", ";
 cout<<bestmove[1]+1<<", to ";
 cout<<bestmove[2]+1<<", ";
-cout<<bestmove[3]+1<<", \n your move\n ";
+cout<<bestmove[3]+1<<", \n your move\n";
 }
 /***       TESTS LEGALITY OF MOVE FOR SEF        ***/
 
@@ -780,7 +791,7 @@ int main() {
 	bool first, AIturn, ingameState;;
 	fluff fluff;
 	board board;
-	//odd numbered depths are on min nodes, even on max.
+	/**odd numbered depths are on min nodes, even on max. This doesn't work.**/
 	cout<<"depth = "<< depth<<". (This should be an even number)\n";
 	cout<<"\n";
 	ingameState = true;
@@ -793,31 +804,15 @@ int main() {
 	else{
         AIturn=false;
 	}
-	board.display();
-
+	/**SETS BOARD UP**/
+    board.manualOverride();
 	while (ingameState == true) {
-		while (ans != 'y') {
-			board.manualOverride();
-			board.display();
-            cout << "\n is board correct? y for yes, n for no \n \n";
-			cin >> ans;
-		}
+        cout<<"\nSEF = " <<state <<"\n";
 		if (AIturn == true) {
                 //ERROR ON FIRST AND SECOND PARAMETERS?
 			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
-            if(state==GAME_OVER_BLACK)
-            {
-            cout<<"Black Loses\n";
-            cin>>ans;
-            break;
-            }
-        if(state==GAME_OVER_WHITE)
-            {
-            cout<<"White Loses\n";
-            cin>>ans;
-            break;
-            }
+
         if (state== WIN)
         {
             cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
@@ -838,23 +833,12 @@ int main() {
 			board.display();
 			AIturn = false;
 			turn++;
+			cout<<"\nSEF = " <<state <<"\n";
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             else if((zpgame==true) && (AIturn==false)){
             state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
 			board.display();
-            if(state==GAME_OVER_BLACK)
-            {
-            cout<<"Black Loses\n";
-            cin>>ans;
-            break;
-            }
-            if(state==GAME_OVER_WHITE)
-            {
-            cout<<"White Loses\n";
-            cin>>ans;
-                break;
-            }
 			if (state== WIN)
 			{
 				cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
@@ -901,21 +885,21 @@ int main() {
 			turn++;
 			AIturn=true;
 			}
-        cout<<  "\n assuming correct board and continue\n";
-        if(state==GAME_OVER_BLACK)
+			        if(state==GAME_OVER_BLACK)
             {
             cout<<"Black Loses\n";
-            cin>>ans;
             break;
             }
         if(state==GAME_OVER_WHITE)
             {
             cout<<"White Loses\n";
-            cin>>ans;
-                break;
+            break;
             }
+        cout<<  "\nassuming correct board and continue\n";
         //cout << "\n is board correct? y for yes, n for no \n \n";
         //cin >> ans;
 	}
+	cout<<"finished in "<<turn<<" turns";
+	cin>>ans;
 	return 0;
 }

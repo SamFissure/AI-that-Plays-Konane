@@ -12,5 +12,5 @@ static const int GAME_OVER_BLACK = -600;
 /**     CHANGE \DEPTH AS NEEDED/DESIRED     **/
 /**   DEPTH MUST BE EVEN, AS PER CONVENTION **/
 /**CONFIRMED \EFFECTIVE AT 6, 8 \PROBLEMATIC**/
-static const int depth = 12;
+static const int depth = 10;
 #endif

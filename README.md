@@ -25,7 +25,10 @@ some global constants MAY become class-member variables.  Other alterations will
 
 :::TODO, NOT NECCESSARILY IN THIS ORDER:::
 1. alphaBetaMinimax becomes alphaBetaMin and alphaBetaMax
+
 2.Parallel processing
 3. Backend
+
 4. Frontend
+
 5. OOP principles to make the game function smoothly, remove code from board class in a way that doesn't impact performance.

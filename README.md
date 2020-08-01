@@ -27,6 +27,7 @@ some global constants MAY become class-member variables.  Other alterations will
 1. alphaBetaMinimax becomes alphaBetaMin and alphaBetaMax
 
 2.Parallel processing
+
 3. Backend
 
 4. Frontend

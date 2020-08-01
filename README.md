@@ -23,9 +23,9 @@ some global constants MAY become class-member variables.  Other alterations will
 4. Code may be refactored to include better recursive algorithims (Minimax will be replaced with 2 recursive functions to improve memory use and possibly speed)
 5. The program will be better timed out so as to verify performance, though the 15 second requirement may be dropped.
 
-:::TODO:::
-alphaBetaMinimax becomes alphaBetaMin and alphaBetaMax
-Parallel processing
-Backend
-Frontend
-OOP principles to make the game function smoothly, remove code from board class in a way that doesn't impact performance.
+:::TODO, NOT NECCESSARILY IN THIS ORDER:::
+1. alphaBetaMinimax becomes alphaBetaMin and alphaBetaMax
+2.Parallel processing
+3. Backend
+4. Frontend
+5. OOP principles to make the game function smoothly, remove code from board class in a way that doesn't impact performance.

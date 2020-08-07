@@ -99,7 +99,7 @@ public:
 	bool setZpgame();
 	bool setColor();
     bool zpgame;
-    bool guardRails();
+    /*bool guardRails();*/
 	void setValues(int b, int w,int x,int dir);
 	 //returns first and color
 	void display();
@@ -260,7 +260,7 @@ bool board::setZpgame(){
 
 }
 /**SAFETY FOR USER ERRORS**/
-bool board::guardRails(){
+/*bool board::guardRails(){
     bool correct=false;
     int i,j,k,m;
     i=bestmove[0];
@@ -278,7 +278,7 @@ bool board::guardRails(){
         cout<<"incorrect move";
         return false;
     }
-}
+}*/
 /***ASSISTS MANUAL OVVERIDE***/
 void board::selection(int S) {
 	int i, j;
@@ -925,7 +925,8 @@ int main() {
                 cin >> k;
                 k--;
                 board.bestmove[2]=k;
-                cor=board.guardRails();
+                cor=true;
+                //guard rails here
             }while(! cor);
 
 			board.makeMove(board.bestmove,humanColor);

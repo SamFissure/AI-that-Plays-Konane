@@ -7,6 +7,5 @@
 #include <cstdlib>
 #include <string>
 /**FOR PARALELL PROCESSING, ADD INCLUDE, DO ON LINUX BOX**/
-using namespace std;
 
 #endif // standard_h

@@ -72,11 +72,11 @@ public:
 void player::jokes()
 {
     int jokes;
-    cout << "Would you like to play a game? \n";
-	cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
-	cin >> jokes;
+    std::cout << "Would you like to play a game? \n";
+	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
+	std::cin >> jokes;
 	if (jokes == 3) {
-		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
+		std::cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
 }
 
@@ -112,8 +112,6 @@ public:
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
 	int calibrate(int i, int playerColor);
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
-    int alphaBetaMin(int alpha, int beta, int level, int depth, int levelColor);
-    int alphaBetaMax(int alpha, int beta, int level, int depth, int levelColor);
     int SEF(int pass);
 	void selection(int S);
 	void displayMove();
@@ -124,117 +122,6 @@ public:
 	int playermove[4];
 
 };
-
-
-
-int board::alphaBetaMax(int alpha, int beta, int level, int depth, int levelColor)
-{
-	int k, m, tshoot, temp;
-	/* Initial values of
-	 * Alpha and Beta
-	 * Terminating condition. i.e
-	 *leaf node, is reached*/
-    int opColor = (levelColor%2)+1;
-    /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
-	int currentmove[4];
-	if (level == depth) {
-        return SEF(levelColor);
-	}
-		int val = MIN;
-
-		for (int i = 0; i < 8; i++)
-		{
-			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
-			{
-				if (board[i][j] > 0)
-				{
-					for (int Dir = 0; Dir < 4; Dir++) {
-						if (legal_move(currentmove, i, j, Dir)) {
-							/*****MOVE PIECE*****/
-							makeMove(currentmove, levelColor);
-							//calls for minimization using the opposing color
-							temp = val;
-							val = max(val, alphaBetaMin(alpha, beta, level + 1, depth, opColor));
-							unmakeMove(currentmove, levelColor, opColor);
-							/**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
-							/**IF CURRENT MOVE BEST, CHANGE MOVE**/
-							if (level == 0 && temp < val) {
-								bestmove[0] = currentmove[0];
-								bestmove[1] = currentmove[1];
-								bestmove[2] = currentmove[2];
-								bestmove[3] = currentmove[3];
-							}
-							alpha = max(alpha, val);
-							//Alpha cutoff
-							if (beta <= alpha) {
-								return alpha;
-							}
-						}
-					}
-
-				}
-			}
-		}
-		/**Program can predict loss, and will end properly if loss, **
-		 **           Program ran out of moves condition            **/
-        if (level == 0 && val == MIN && levelColor == 1)
-		{
-			return GAME_OVER_WHITE;
-		}
-        if (level == 0 && val == MIN && levelColor == 2)
-		{
-			return GAME_OVER_BLACK;
-		}
-		if (val == MIN)
-		{
-		    /**ran out of moves on maximizer with no change**/
-			return LOSE;
-		}
-
-    return val;
-	}
-board::alphaBetaMin()
-{
-		//cout << "minimizing \n";
-		int k, m, tshoot, temp;
-		int val = MAX;
-		int opColor = (levelColor%2)+1;
-		for (int i = 0; i < 8; i++)
-		{
-			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
-			{
-				if (board[i][j] > 0)
-				{
-					for (int Dir = 0; Dir < 4; Dir++) {
-						if (legal_move(currentmove, i, j, Dir)) {
-                            /*    cout << "\n ";
-							for (int z = 0; z < 4; z++) {
-								cout << currentmove[z] + 1;
-							}
-                            cout << "\n ";
-                            */
-
-							makeMove(currentmove, levelColor);
-							val = min(val, alphaBetaMax(alpha, beta, level + 1, depth, opColor));
-							beta = min(beta, val);
-							unmakeMove(currentmove, levelColor, opColor);
-							// Alpha Beta Pruning
-							if (beta <= alpha) {
-                                    //Beta cutoff
-								return beta;
-							}
-						}
-					}
-				}
-			}
-		}
-		if (val == MAX)
-		{
-		    /**ran out of moves on mimimzer with no change, pass up detected win**/
-			return WIN;
-		}
-		return val;
-	}
 
 
 /***ALPHABETA MINIMAX BELOW***/
@@ -253,7 +140,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	int currentmove[4];
 	if (level == depth) {
 			tshoot = SEF(levelColor);
-			//cout << "\nSEF= " << tshoot << "\n";
+			//std::cout << "\nSEF= " << tshoot << "\n";
 			return tshoot;
 	}
 	else if (maximizing == true)
@@ -272,7 +159,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							makeMove(currentmove, levelColor);
 							//calls for minimization using the opposing color
 							temp = val;
-							val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
+							val = std::max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
 							unmakeMove(currentmove, levelColor, opColor);
 							/**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
 							/**IF CURRENT MOVE BEST, CHANGE MOVE**/
@@ -282,7 +169,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 								bestmove[2] = currentmove[2];
 								bestmove[3] = currentmove[3];
 							}
-							alpha = max(alpha, val);
+							alpha = std::max(alpha, val);
 							//Alpha cutoff
 							if (beta <= alpha) {
 								return alpha;
@@ -311,7 +198,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	}
 	else
 	{
-		//cout << "minimizing \n";
+		//std::cout << "minimizing \n";
 		int val = MAX;
 		for (int i = 0; i < 8; i++)
 		{
@@ -321,16 +208,16 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
-                            /*    cout << "\n ";
+                            /*    std::cout << "\n ";
 							for (int z = 0; z < 4; z++) {
-								cout << currentmove[z] + 1;
+								std::cout << currentmove[z] + 1;
 							}
-                            cout << "\n ";
+                            std::cout << "\n ";
                             */
 
 							makeMove(currentmove, levelColor);
-							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
-							beta = min(beta, val);
+							val = std::min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
+							beta = std::min(beta, val);
 							unmakeMove(currentmove, levelColor, opColor);
 							// Alpha Beta Pruning
 							if (beta <= alpha) {
@@ -353,15 +240,15 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		}
 		return val;
 	}
-	cout << "ERROR";
+	std::cout << "ERROR";
 	return -1;
 }
 /**ZERO PLAYER GAME SELECTION**/
 bool board::setZpgame(){
     char ans;
     do{
-        cout<<"Will I be playing Myself? \ny/n\n";
-        cin>>ans;
+        std::cout<<"Will I be playing Myself? \ny/n\n";
+        std::cin>>ans;
         if (ans=='y'){
         return true;
         }
@@ -388,21 +275,22 @@ bool board::guardRails(){
         {
             return true;
         }
-        cout<<"incorrect move";
+        std::cout<<"incorrect move";
         return false;
     }
+    return true;
 }
 /***ASSISTS MANUAL OVVERIDE***/
 void board::selection(int S) {
 	int i, j;
-	cout << "\n column (A-H = 1-8): ";
-	cin >> j;
-	cout << "\n row (1-8): ";
-	cin >> i;
+	std::cout << "\n column (A-H = 1-8): ";
+	std::cin >> j;
+	std::cout << "\n row (1-8): ";
+	std::cin >> i;
 	i--;
 	j--;
 	if (i > 7 || i < 0 || j>7 || j < 0) {
-		cout << "\n invalid choice, restarting selection";
+		std::cout << "\n invalid choice, restarting selection";
 	}
 
 	else {
@@ -422,39 +310,39 @@ void board::manualOverride() {
 			while (ans != 'y') {
             display();
 
-	cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
-	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
-	cin >> remadd;
+	std::cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
+	std::cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+	std::cin >> remadd;
 		while (remadd != 'e') {
 			if (remadd == 'e'){}
 			else if (remadd == 'r')
 			{
-				cout << "What pieces will be removed? choose row and column for each.  (NO adjacency test)\n";
+				std::cout << "What pieces will be removed? choose row and column for each.  (NO adjacency test)\n";
 				selection(0);
 			}
 			else if (remadd == 'b')
 			{
-				cout << "What black pieces will be added? choose row and column for each.  (NO adjacency test)\n";
+				std::cout << "What black pieces will be added? choose row and column for each.  (NO adjacency test)\n";
 				selection(2);
 			}
 			else if (remadd == 'w') {
-				cout << "What white pieces will be added? choose row and column for each.  (NO adjacency test)\n";
+				std::cout << "What white pieces will be added? choose row and column for each.  (NO adjacency test)\n";
 				selection(1);
 			}
 			else{
-				cout <<"\n invalid choice, restarting selection\n";
+				std::cout <<"\n invalid choice, restarting selection\n";
                 display();
-                cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
-                cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
-                cin >> remadd;
+                std::cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
+                std::cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+                std::cin >> remadd;
 			}
         display();
-        cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
-        cin >> remadd;
+        std::cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+        std::cin >> remadd;
 	}
     display();
-    cout << "\n is board correct? y for yes, n for no \n \n";
-	cin >> ans;
+    std::cout << "\n is board correct? y for yes, n for no \n \n";
+	std::cin >> ans;
 }
 }
 
@@ -467,26 +355,26 @@ bool board::setColor() {
     bool first;
     while (ans != 'y') {
 
-		cout << "\nWhat color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules \n black is X, white is O)\n ";
-        cin >> AIcolor;
+		std::cout << "\nWhat color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules \n black is X, white is O)\n ";
+        std::cin >> AIcolor;
 
         if (AIcolor == 2)
         {
             humanColor = 1;
             first = true;
-        cout<< "\nI play as black and go first.";
+        std::cout<< "\nI play as black and go first.";
         }
         else if (AIcolor == 1)
         {
             humanColor = 2;
             first = false;
-            cout<< "\nI play as white and go second.";
+            std::cout<< "\nI play as white and go second.";
         }
         else {
-            cout << "\nerror, restarting";
+            std::cout << "\nerror, restarting";
         }
-        cout << "\nIs this correct? y for yes:\n";
-		cin >> ans;
+        std::cout << "\nIs this correct? y for yes:\n";
+		std::cin >> ans;
 	}
 	return first;
 }
@@ -521,34 +409,34 @@ int board::calibrate(int i, int playerColor)
 /***FAIRLY SIMPLE DISPLAY FUNCTION***/
 void board::display() {
 	int row = 0;
-	cout << "   A B C D E F G H \n";
-    cout << "   1 2 3 4 5 6 7 8 ";
+	std::cout << "   A B C D E F G H \n";
+    std::cout << "   1 2 3 4 5 6 7 8 ";
 
-	cout<< "\n \n";
+	std::cout<< "\n \n";
 	for (int i = 0; i < 8; i++) {
-        cout << ++row <<"  ";
+        std::cout << ++row <<"  ";
 
 		for (int j = 0; j < 8; j++) {
 
 
 			if (board[i][j] > 1) {
-				cout << "X ";
+				std::cout << "X ";
 			}
 			else if (board[i][j] > 0) {
-				cout << "O ";
+				std::cout << "O ";
 			}
 			else {
-				cout << "  ";
+				std::cout << "  ";
 			}
 		}
-		cout << "\n";
+		std::cout << "\n";
 	}
 }
 void board::displayMove(){
-cout<<"\n"<<bestmove[0]+1<<", ";
-cout<<bestmove[1]+1<<", to ";
-cout<<bestmove[2]+1<<", ";
-cout<<bestmove[3]+1<<", \n your move\n";
+std::cout<<"\n"<<bestmove[0]+1<<", ";
+std::cout<<bestmove[1]+1<<", to ";
+std::cout<<bestmove[2]+1<<", ";
+std::cout<<bestmove[3]+1<<", \n your move\n";
 }
 /***       TESTS LEGALITY OF MOVE FOR SEF        ***/
 
@@ -766,14 +654,14 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 
 /** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME **/
 void board::makeMove(int currentmove[], int playerColor)
-{   //cout<<"making move\n";
+{   //std::cout<<"making move\n";
     int i,j,k,m;
     bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
-	//cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
+	//std::cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
 	neq = true;
     do {
     board[i][j] = 0;
@@ -818,7 +706,7 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 	m = currentmove[3];
 
 	while (neq){
-        //cout << "\nunmaking move: ";
+        //std::cout << "\nunmaking move: ";
 		board[k][m] = 0;
 		if (k > i)
 		{
@@ -927,7 +815,7 @@ int board::SEF(int playerColor) {
 
 		}
 	}
-   //cout<<"SEF EXECUTED ON BELOW BOARD\n";
+   //std::cout<<"SEF EXECUTED ON BELOW BOARD\n";
    //display();
     return (sum+(pb-oPiece));
 }
@@ -947,8 +835,8 @@ int main() {
 	player player;
 	board board;
 	/**odd numbered depths are on min nodes, even on max. This doesn't work.**/
-	cout<<"depth = "<< depth<<". (This should be an even number)\n";
-	cout<<"\n";
+	std::cout<<"depth = "<< depth<<". (This should be an even number)\n";
+	std::cout<<"\n";
 	ingameState = true;
 
 	player.jokes();
@@ -966,21 +854,21 @@ int main() {
 	/**SETS BOARD UP**/
     board.manualOverride();
 	while (ingameState == true) {
-        cout<<"\nSEF = " <<state <<"\n";
+        std::cout<<"\nSEF = " <<state <<"\n";
 		if (AIturn) {
                 //ERROR ON FIRST AND SECOND PARAMETERS?
-			state=board.alphaBetaMax(1, 2, level, depth, AIcolor);
+			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
 
         if (state== WIN)
         {
-            cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
+            std::cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
             board.makeMove(board.bestmove, AIcolor);
             board.displayMove();
         }
 			else if (state == LOSE)
 			{
-				cout << "It looks like I will lose soon, but we should play it out.\n";
+				std::cout << "It looks like I will lose soon, but we should play it out.\n";
 				board.makeMove(board.bestmove, AIcolor);
 				board.displayMove();
 			}
@@ -992,21 +880,21 @@ int main() {
 			board.display();
 			AIturn = false;
 			turn++;
-			cout<<"\nSEF = " <<state <<"\n";
+			std::cout<<"\nSEF = " <<state <<"\n";
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             else if((right) && (AIturn==false)){
-            state=board.alphaBetaMax(1, 2, level, depth, humanColor);
+            state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
 			board.display();
 			if (state== WIN)
 			{
-				cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
+				std::cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
 				board.makeMove(board.bestmove, humanColor);
 				board.displayMove();
 			}
 			else if (state == LOSE)
 			{
-				cout << "It looks like I will lose soon. If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
+				std::cout << "It looks like I will lose soon. If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
 				board.makeMove(board.bestmove, humanColor);
 				board.displayMove();
 			}
@@ -1021,21 +909,21 @@ int main() {
             /** if PLAYING A HUMAN**/
 		else {
             do{
-                cout << "\nenter piece to move column, 1-8: ";
-                cin >> j;
+                std::cout << "\nenter piece to move column, 1-8: ";
+                std::cin >> j;
                 //accomodate indexing
                 j--;
                 board.bestmove[1]=j;
-                cout << "\nenter piece to move row, 1-8: ";
-                cin >> i;
+                std::cout << "\nenter piece to move row, 1-8: ";
+                std::cin >> i;
                 i--;
                 board.bestmove[0]=i;
-                cout << "\nenter piece destination column, 1-8: ";
-                cin >> m;
+                std::cout << "\nenter piece destination column, 1-8: ";
+                std::cin >> m;
                 m--;
                 board.bestmove[3]=m;
-                cout << "\nenter piece destination row, 1-8: ";
-                cin >> k;
+                std::cout << "\nenter piece destination row, 1-8: ";
+                std::cin >> k;
                 k--;
                 board.bestmove[2]=k;
                 cor=board.guardRails();
@@ -1049,19 +937,19 @@ int main() {
 			}
 			        if(state==GAME_OVER_BLACK)
             {
-            cout<<"Black Loses\n";
+            std::cout<<"Black Loses\n";
             break;
             }
         if(state==GAME_OVER_WHITE)
             {
-            cout<<"White Loses\n";
+            std::cout<<"White Loses\n";
             break;
             }
-        cout<<  "\nassuming correct board and continue\n";
-        //cout << "\n is board correct? y for yes, n for no \n \n";
-        //cin >> ans;
+        std::cout<<  "\nassuming correct board and continue\n";
+        //std::cout << "\n is board correct? y for yes, n for no \n \n";
+        //std::cin >> ans;
 	}
-	cout<<"finished in "<<turn<<" turns";
-	cin>>ans;
+	std::cout<<"finished in "<<turn<<" turns";
+	std::cin>>ans;
 	return 0;
 }

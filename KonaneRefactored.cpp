@@ -44,6 +44,20 @@
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
 /**INCLUDE PARALELL PROCESSING??**/
+#include "standard.h"
+/**INCLUDE PARALELL PROCESSING??**/
+#include <algorithm>
+#include <chrono>
+#include <random>
+#include <ratio>
+using std::chrono::duration;
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::milli;
+using std::random_device;
+using std::sort;
+using std::cout;
+using std::cin;
 /*Include Constants*/
 #include "const.h"
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/

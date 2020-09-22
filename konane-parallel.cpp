@@ -44,8 +44,19 @@
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
 /**INCLUDE PARALELL PROCESSING??**/
+/**INCLUDE PARALELL PROCESSING??**/
+#include <algorithm>
+#include <chrono>
+#include <random>
+#include <ratio>
+#include <thread>
+using std::chrono::duration;
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::milli;
 /*Include Constants*/
 #include "const.h"
+using namespace std;
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
 /*dynamic globals, may alter as needed*/
 
@@ -68,22 +79,23 @@ public:
     void jokes();
     void detectWL(int value);
 };
-
 void player::jokes()
 {
     int jokes;
-    cout << "Would you like to play a game? \n";
-	cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
-	cin >> jokes;
+    std::cout << "Would you like to play a game? \n";
+	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
+	std::cin >> jokes;
 	if (jokes == 3) {
-		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
+		std::cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
 }
 
 void player::detectWL(int value){}
 
 class board {
-	int board[8][8] = {
+    public:
+    int bval;
+	int objBoard[8][8] = {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B},
 		{B,W,B,W,B,W,B,W},
@@ -93,9 +105,9 @@ class board {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B}
 		};
-
-public:
 	/*all functions void functions until code is fully determined.*/
+     //is always maximizing
+
 	bool setZpgame();
 	bool setColor();
     bool zpgame;
@@ -110,18 +122,73 @@ public:
 	bool legal_SEF(int i, int j, int Dir);
 	void makeMove(int currentmove[], int playerColor);
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
-	int calibrate(int i, int playerColor);
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
     int SEF(int pass);
 	void selection(int S);
 	void displayMove();
-
-
+    board comparison (board board1, board board2, board board3, board board4, board board5, board board6, board board7, board board8);
+    void threadKonane(int i,int alpha, int beta, int depth, int levelColor);
+    int calibrate(int i, int playerColor);
 	//RECORDS MOVES BESTMOVE HOLDS FIRST MOVE AND THEN ANY MOVE THAT IS BETTER.
 	int bestmove[4];
 	int playermove[4];
 
 };
+
+
+
+void board::threadKonane(int i,int alpha, int beta, int depth, int levelColor){
+int k, m, temp;
+   int opColor = levelColor%2;
+    opColor++;
+    /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
+	int currentmove[4];
+	int val = MIN;
+    bval= MIN;
+for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
+	{
+		if (objBoard[i][j] > 0)
+		{
+			for (int Dir = 0; Dir < 4; Dir++) {
+				if (legal_move(currentmove, i, j, Dir)) {
+					/*****MOVE PIECE*****/
+					makeMove(currentmove, levelColor);
+					//calls for minimization using the opposing color
+					temp = val;
+					//needs some work.
+					val = max(val, alphaBetaMinimax(alpha, beta, 1, depth, opColor, false));
+
+
+					unmakeMove(currentmove, levelColor, opColor);
+
+                    /**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
+					/**IF CURRENT MOVE BEST, CHANGE MOVE**/
+                    //This normally happens at depth zero
+                    //This IS "depth zero" as far as the code
+                    //is concerned, hence this can happen here.
+                    //could remove from other code.
+					alpha = max(alpha, val);
+                        if (temp < val) {
+                            bval=val; //add a bval variable to board.
+                            bestmove[0] = currentmove[0];
+                            bestmove[1] = currentmove[1];
+                            bestmove[2] = currentmove[2];
+                            bestmove[3] = currentmove[3];
+                        }
+					//Alpha cutoff
+					//DO WE NEED AN ALPHA CUTOFF IF PARALLEL?
+					//THERE WILL NEVER BE AN UNEXPLORED MOVE AT ROOT
+					//CUTOFFS WILL DEFINITELY HAPPEN LOWER IN TREE
+					/*if (beta <= alpha) {
+                        return alpha;
+						}*/
+				}
+			}
+		}
+	}
+	cout<<"SEF of thread "<<i<<" = "<<bval<<endl;
+return;
+}
 
 
 /***ALPHABETA MINIMAX BELOW***/
@@ -140,7 +207,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	int currentmove[4];
 	if (level == depth) {
 			tshoot = SEF(levelColor);
-			//cout << "\nSEF= " << tshoot << "\n";
+			//std::cout << "\nSEF= " << tshoot << "\n";
 			return tshoot;
 	}
 	else if (maximizing == true)
@@ -151,7 +218,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		{
 			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 			{
-				if (board[i][j] > 0)
+				if (objBoard[i][j] > 0)
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
@@ -159,7 +226,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							makeMove(currentmove, levelColor);
 							//calls for minimization using the opposing color
 							temp = val;
-							val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
+							val = std::max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
 							unmakeMove(currentmove, levelColor, opColor);
 							/**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
 							/**IF CURRENT MOVE BEST, CHANGE MOVE**/
@@ -169,7 +236,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 								bestmove[2] = currentmove[2];
 								bestmove[3] = currentmove[3];
 							}
-							alpha = max(alpha, val);
+							alpha = std::max(alpha, val);
 							//Alpha cutoff
 							if (beta <= alpha) {
 								return alpha;
@@ -181,14 +248,6 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 			}
 		}
 		/**Program can predict loss, and will end properly if loss.**/
-        if (level == 0 && val == MIN && levelColor == 1)
-		{
-			return GAME_OVER_WHITE;
-		}
-        if (level == 0 && val == MIN && levelColor == 2)
-		{
-			return GAME_OVER_BLACK;
-		}
 		if (val == MIN)
 		{
 			return LOSE;
@@ -198,26 +257,26 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	}
 	else
 	{
-		//cout << "minimizing \n";
+		//std::cout << "minimizing \n";
 		int val = MAX;
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 			{
-				if (board[i][j] > 0)
+				if (objBoard[i][j] > 0)
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
-                            /*    cout << "\n ";
+                            /*    std::cout << "\n ";
 							for (int z = 0; z < 4; z++) {
-								cout << currentmove[z] + 1;
+								std::cout << currentmove[z] + 1;
 							}
-                            cout << "\n ";
+                            std::cout << "\n ";
                             */
 
 							makeMove(currentmove, levelColor);
-							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
-							beta = min(beta, val);
+							val = std::min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
+							beta = std::min(beta, val);
 							unmakeMove(currentmove, levelColor, opColor);
 							// Alpha Beta Pruning
 							if (beta <= alpha) {
@@ -240,15 +299,66 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		}
 		return val;
 	}
-	cout << "ERROR";
+	std::cout << "ERROR";
 	return -1;
 }
+
+board board::comparison (board board1, board board2, board board3, board board4, board board5, board board6, board board7, board board8)
+{
+    if (board1.bval<board2.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board2;
+    }
+    if (board1.bval<board3.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board3;
+    }
+    if (board1.bval<board4.bval)
+    {
+       cout<<board1.bval<<endl;
+        board1=board4;
+    }
+    if (board1.bval<board5.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board5;
+    }
+    if (board1.bval<board6.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board6;
+    }
+    if (board1.bval<board7.bval)
+    {   cout<<board1.bval<<endl;
+        board1=board7;
+    }
+    if (board1.bval<board8.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board8;
+        cout<<board1.bval<<endl;
+    }
+
+    return board1;
+}
+int board::calibrate(int i, int playerColor)
+{
+	if (playerColor == 2)
+        {return i % 2;}
+	//starting index of an even i will be 0
+	else
+	//starting index of an even i will be 1
+        {return (i + 1) % 2;}
+}
+
 /**ZERO PLAYER GAME SELECTION**/
 bool board::setZpgame(){
     char ans;
     do{
-        cout<<"Will I be playing Myself? \ny/n\n";
-        cin>>ans;
+        std::cout<<"Will I be playing Myself? \ny/n\n";
+        std::cin>>ans;
         if (ans=='y'){
         return true;
         }
@@ -275,25 +385,26 @@ bool board::guardRails(){
         {
             return true;
         }
-        cout<<"incorrect move";
+        std::cout<<"incorrect move";
         return false;
     }
+    return true;
 }
 /***ASSISTS MANUAL OVVERIDE***/
 void board::selection(int S) {
 	int i, j;
-	cout << "\n column (A-H = 1-8): ";
-	cin >> j;
-	cout << "\n row (1-8): ";
-	cin >> i;
+	std::cout << "\n column (A-H = 1-8): ";
+	std::cin >> j;
+	std::cout << "\n row (1-8): ";
+	std::cin >> i;
 	i--;
 	j--;
 	if (i > 7 || i < 0 || j>7 || j < 0) {
-		cout << "\n invalid choice, restarting selection";
+		std::cout << "\n invalid choice, restarting selection";
 	}
 
 	else {
-		board[i][j] = S;
+		objBoard[i][j] = S;
 	}
 	return;
 }
@@ -309,39 +420,39 @@ void board::manualOverride() {
 			while (ans != 'y') {
             display();
 
-	cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
-	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
-	cin >> remadd;
+	std::cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
+	std::cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+	std::cin >> remadd;
 		while (remadd != 'e') {
 			if (remadd == 'e'){}
 			else if (remadd == 'r')
 			{
-				cout << "What pieces will be removed? choose row and column for each.  (NO adjacency test)\n";
+				std::cout << "What pieces will be removed? choose row and column for each.  (NO adjacency test)\n";
 				selection(0);
 			}
 			else if (remadd == 'b')
 			{
-				cout << "What black pieces will be added? choose row and column for each.  (NO adjacency test)\n";
+				std::cout << "What black pieces will be added? choose row and column for each.  (NO adjacency test)\n";
 				selection(2);
 			}
 			else if (remadd == 'w') {
-				cout << "What white pieces will be added? choose row and column for each.  (NO adjacency test)\n";
+				std::cout << "What white pieces will be added? choose row and column for each.  (NO adjacency test)\n";
 				selection(1);
 			}
 			else{
-				cout <<"\n invalid choice, restarting selection\n";
+				std::cout <<"\n invalid choice, restarting selection\n";
                 display();
-                cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
-                cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
-                cin >> remadd;
+                std::cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
+                std::cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+                std::cin >> remadd;
 			}
         display();
-        cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
-        cin >> remadd;
+        std::cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
+        std::cin >> remadd;
 	}
     display();
-    cout << "\n is board correct? y for yes, n for no \n \n";
-	cin >> ans;
+    std::cout << "\n is board correct? y for yes, n for no \n \n";
+	std::cin >> ans;
 }
 }
 
@@ -354,26 +465,26 @@ bool board::setColor() {
     bool first;
     while (ans != 'y') {
 
-		cout << "\nWhat color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules \n black is X, white is O)\n ";
-        cin >> AIcolor;
+		std::cout << "\nWhat color should 'I' play as? \n 1 for white and 2 for black:\n(black goes first per Konane rules \n black is X, white is O)\n ";
+        std::cin >> AIcolor;
 
         if (AIcolor == 2)
         {
             humanColor = 1;
             first = true;
-        cout<< "\nI play as black and go first.";
+        std::cout<< "\nI play as black and go first.";
         }
         else if (AIcolor == 1)
         {
             humanColor = 2;
             first = false;
-            cout<< "\nI play as white and go second.";
+            std::cout<< "\nI play as white and go second.";
         }
         else {
-            cout << "\nerror, restarting";
+            std::cout << "\nerror, restarting";
         }
-        cout << "\nIs this correct? y for yes:\n";
-		cin >> ans;
+        std::cout << "\nIs this correct? y for yes:\n";
+		std::cin >> ans;
 	}
 	return first;
 }
@@ -383,7 +494,7 @@ bool board::setColor() {
 /***       COLOR AGNOSTIC           ***/
 bool board::isFull(int i, int j) {
 
-	if (board[i][j] == 0){
+	if (objBoard[i][j] == 0){
 		return false;
 	}
 
@@ -394,48 +505,40 @@ bool board::isFull(int i, int j) {
 
 
 /***ASSISTS WITH CALIBRATION OF SQUARES, DEALS WITH DOUBLE WHITE/BLACK BOARD EDGE ISSUE***/
-int board::calibrate(int i, int playerColor)
-{
-	if (playerColor == 2)
-	{ return i % 2; }
-	//starting index of an even i will be 0
-	else
-	//starting index of an even i will be 1
-	{ return (i + 1) % 2; }
-}
+
 
 
 /***FAIRLY SIMPLE DISPLAY FUNCTION***/
 void board::display() {
 	int row = 0;
-	cout << "   A B C D E F G H \n";
-    cout << "   1 2 3 4 5 6 7 8 ";
+	std::cout << "   A B C D E F G H \n";
+    std::cout << "   1 2 3 4 5 6 7 8 ";
 
-	cout<< "\n \n";
+	std::cout<< "\n \n";
 	for (int i = 0; i < 8; i++) {
-        cout << ++row <<"  ";
+        std::cout << ++row <<"  ";
 
 		for (int j = 0; j < 8; j++) {
 
 
-			if (board[i][j] > 1) {
-				cout << "X ";
+			if (objBoard[i][j] > 1) {
+				std::cout << "X ";
 			}
-			else if (board[i][j] > 0) {
-				cout << "O ";
+			else if (objBoard[i][j] > 0) {
+				std::cout << "O ";
 			}
 			else {
-				cout << "  ";
+				std::cout << "  ";
 			}
 		}
-		cout << "\n";
+		std::cout << "\n";
 	}
 }
 void board::displayMove(){
-cout<<"\n"<<bestmove[0]+1<<", ";
-cout<<bestmove[1]+1<<", to ";
-cout<<bestmove[2]+1<<", ";
-cout<<bestmove[3]+1<<", \n your move\n";
+std::cout<<"\n"<<bestmove[0]+1<<", ";
+std::cout<<bestmove[1]+1<<", to ";
+std::cout<<bestmove[2]+1<<", ";
+std::cout<<bestmove[3]+1<<", \n your move\n";
 }
 /***       TESTS LEGALITY OF MOVE FOR SEF        ***/
 
@@ -653,40 +756,40 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 
 /** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME **/
 void board::makeMove(int currentmove[], int playerColor)
-{   //cout<<"making move\n";
+{   //std::cout<<"making move\n";
     int i,j,k,m;
     bool neq;
 	i = currentmove[0];
 	j = currentmove[1];
 	k = currentmove[2];
 	m = currentmove[3];
-	//cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
+	//std::cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
 	neq = true;
     do {
-    board[i][j] = 0;
+    objBoard[i][j] = 0;
 
     if (k < i)
     {
-        board[i - 1][j] = 0;
-        board[i - 2][j] = playerColor;
+        objBoard[i - 1][j] = 0;
+        objBoard[i - 2][j] = playerColor;
         i=i-2;
     }
     if (k > i)
     {
-        board[i + 1][j] = 0;
-        board[i + 2][j] = playerColor;
+        objBoard[i + 1][j] = 0;
+        objBoard[i + 2][j] = playerColor;
         i=i+2;
     }
     if (m < j)
     {
-        board[i][j - 1] = 0;
-        board[i][j - 2] = playerColor;
+        objBoard[i][j - 1] = 0;
+        objBoard[i][j - 2] = playerColor;
         j=j-2;
     }
     if (m > j)
     {
-        board[i][j + 1] = 0;
-        board[i][j + 2] = playerColor;
+        objBoard[i][j + 1] = 0;
+        objBoard[i][j + 2] = playerColor;
         j=j+2;
     }
     if((i==k)&&(m==j)){neq=false;}
@@ -705,12 +808,12 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 	m = currentmove[3];
 
 	while (neq){
-        //cout << "\nunmaking move: ";
-		board[k][m] = 0;
+        //std::cout << "\nunmaking move: ";
+		objBoard[k][m] = 0;
 		if (k > i)
 		{
-			board[k - 1][m] = opColor;
-			board[k - 2][m] = playerColor;
+			objBoard[k - 1][m] = opColor;
+			objBoard[k - 2][m] = playerColor;
             k=k-2;
             if(k==i)
             {
@@ -719,8 +822,8 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 		}
 		if (k < i)
 		{
-			board[k + 1][m] = opColor;
-			board[k + 2][m] = playerColor;
+			objBoard[k + 1][m] = opColor;
+			objBoard[k + 2][m] = playerColor;
 			k=k+2;
             if(k==i)
             {
@@ -729,8 +832,8 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 		}
 		if (m > j)
 		{
-			board[k][m-1] = opColor;
-			board[k][m-2] = playerColor;
+			objBoard[k][m-1] = opColor;
+			objBoard[k][m-2] = playerColor;
 			m=m-2;
             if(m==j)
             {
@@ -739,8 +842,8 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 		}
 		if (m < j)
 		{
-			board[k][m+1] = opColor;
-			board[k][m+2] = playerColor;
+			objBoard[k][m+1] = opColor;
+			objBoard[k][m+2] = playerColor;
 			m=m+2;
             if(m==j)
             {
@@ -784,7 +887,7 @@ int board::SEF(int playerColor) {
 	{
 		for (int j = calibrate(i, playerColor); j < 8; j = j + 2)
 		{
-			if (board[i][j] > 0)
+			if (objBoard[i][j] > 0)
 			{
 			    pb++;
 				for (int Dir = 0; Dir < 4; Dir++) {
@@ -801,7 +904,7 @@ int board::SEF(int playerColor) {
 	{
 		for (int j = calibrate(i, opColor); j < 8; j = j + 2)
 		{
-			if (board[i][j] > 0)
+			if (objBoard[i][j] > 0)
 			{
 			    oPiece++;
 				for (int Dir = 0; Dir < 4; Dir++) {
@@ -814,7 +917,7 @@ int board::SEF(int playerColor) {
 
 		}
 	}
-   //cout<<"SEF EXECUTED ON BELOW BOARD\n";
+   //std::cout<<"SEF EXECUTED ON BELOW BOARD\n";
    //display();
     return (sum+(pb-oPiece));
 }
@@ -832,10 +935,10 @@ int main() {
 	bool first, AIturn, ingameState, right;
 	bool cor=true;
 	player player;
-	board board;
-	/**odd numbered depths are on min nodes, even on max. This doesn't work.**/
-	cout<<"depth = "<< depth<<". (This should be an even number)\n";
-	cout<<"\n";
+	board board, board1, board2, board3, board4, board5, board6, board7, board8;
+	/**odd numbered depths end on min nodes, even on max. This doesn't work.**/
+	std::cout<<"depth = "<< depth<<". (This should be an even number)\n";
+	std::cout<<"\n";
 	ingameState = true;
 
 	player.jokes();
@@ -852,77 +955,137 @@ int main() {
 	}
 	/**SETS BOARD UP**/
     board.manualOverride();
+    board1=board;
+    board2=board;
+    board3=board;
+    board4=board;
+    board5=board;
+    board6=board;
+    board7=board;
+    board8=board;
 	while (ingameState == true) {
-        cout<<"\nSEF = " <<state <<"\n";
+        if(board.bval<-500){
+            if(AIcolor=1)
+            {
+                cout<<"Game Over, Black loses";
+            }
+            else
+            {
+                cout<<"Game over, White loses";
+            }
+        break;
+        }
+
 		if (AIturn) {
-                //ERROR ON FIRST AND SECOND PARAMETERS?
-			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
+            board1=board;
+            board2=board;
+            board3=board;
+            board4=board;
+            board5=board;
+            board6=board;
+            board7=board;
+            board8=board;
+			thread th1( &board::threadKonane, &board1, 0, 1,2,depth,AIcolor);
+			thread th2( &board::threadKonane, &board2, 1, 1,2,depth,AIcolor);
+			thread th3( &board::threadKonane, &board3, 2, 1,2,depth,AIcolor);
+			thread th4( &board::threadKonane, &board4, 3, 1,2,depth,AIcolor);
+			thread th5( &board::threadKonane, &board5, 4, 1,2,depth,AIcolor);
+			thread th6( &board::threadKonane, &board6, 5, 1,2,depth,AIcolor);
+			thread th7( &board::threadKonane, &board7, 6, 1,2,depth,AIcolor);
+			thread th8( &board::threadKonane, &board8, 7, 1,2,depth,AIcolor);
+			th1.join();
+			th2.join();
+			th3.join();
+			th4.join();
+			th5.join();
+			th6.join();
+			th7.join();
+			th8.join();
+			board = board.comparison(board1, board2, board3, board4, board5, board6, board7, board8);
 			board.display();
 
-        if (state== WIN)
-        {
-            cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
             board.makeMove(board.bestmove, AIcolor);
             board.displayMove();
-        }
-			else if (state == LOSE)
-			{
-				cout << "It looks like I will lose soon, but we should play it out.\n";
-				board.makeMove(board.bestmove, AIcolor);
-				board.displayMove();
-			}
-			else {
-				board.makeMove(board.bestmove, AIcolor);
-				board.displayMove();
-
-			}
 			board.display();
 			AIturn = false;
 			turn++;
-			cout<<"\nSEF = " <<state <<"\n";
+            if(board.bval<-500){
+                if(AIcolor=1)
+                {
+                    cout<<"Game Over, Black loses";
+                }
+                else
+                {
+                    cout<<"Game over, White loses";
+                }
+                break;
+            }
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
-            else if((right) && (AIturn==false)){
-            state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
-			board.display();
-			if (state== WIN)
-			{
-				cout << "It looks like I will win soon, but I am buggy as heck, so let's keep playing. \n";
+            if((right) && (AIturn==false)){
+                board1=board;
+                board2=board;
+                board3=board;
+                board4=board;
+                board5=board;
+                board6=board;
+                board7=board;
+                board8=board;
+                thread th1( &board::threadKonane, &board1, 0, 1,2,depth,humanColor);
+                thread th2( &board::threadKonane, &board2, 1, 1,2,depth,humanColor);
+                thread th3( &board::threadKonane, &board3, 2, 1,2,depth,humanColor);
+                thread th4( &board::threadKonane, &board4, 3, 1,2,depth,humanColor);
+                thread th5( &board::threadKonane, &board5, 4, 1,2,depth,humanColor);
+                thread th6( &board::threadKonane, &board6, 5, 1,2,depth,humanColor);
+                thread th7( &board::threadKonane, &board7, 6, 1,2,depth,humanColor);
+                thread th8( &board::threadKonane, &board8, 7, 1,2,depth,humanColor);
+                th1.join();
+                th2.join();
+                th3.join();
+                th4.join();
+                th5.join();
+                th6.join();
+                th7.join();
+                th8.join();
+                board = board.comparison (board1, board2, board3, board4, board5, board6, board7, board8);
+                board.display();
+
 				board.makeMove(board.bestmove, humanColor);
 				board.displayMove();
-			}
-			else if (state == LOSE)
-			{
-				cout << "It looks like I will lose soon. If I were built by Cyberdine, I could send someone back to 'fix' this... \n";
-				board.makeMove(board.bestmove, humanColor);
-				board.displayMove();
-			}
-			else {
-				board.makeMove(board.bestmove, humanColor);
-				board.displayMove();
-				}
-			board.display();
-			AIturn = true;
-			turn++;
-            }
+
+                board.display();
+                AIturn = true;
+                turn++;
+                if(board.bval<-500){
+                    if(humanColor=2)
+                    {
+                        cout<<"Game Over, Black loses";
+                    }
+                    else
+                    {
+                        cout<<"Game over, White loses";
+                    }
+                    break;
+                }
+                }
             /** if PLAYING A HUMAN**/
-		else {
+		if((!right) && (AIturn==false)) {
             do{
-                cout << "\nenter piece to move column, 1-8: ";
-                cin >> j;
+                std::cout << "\nenter piece to move column, 1-8: ";
+                std::cin >> j;
                 //accomodate indexing
                 j--;
                 board.bestmove[1]=j;
-                cout << "\nenter piece to move row, 1-8: ";
-                cin >> i;
+                std::cout << "\nenter piece to move row, 1-8: ";
+                std::cin >> i;
                 i--;
                 board.bestmove[0]=i;
-                cout << "\nenter piece destination column, 1-8: ";
-                cin >> m;
+                std::cout << "\nenter piece destination column, 1-8: ";
+                std::cin >> m;
                 m--;
                 board.bestmove[3]=m;
-                cout << "\nenter piece destination row, 1-8: ";
-                cin >> k;
+                std::cout << "\nenter piece destination row, 1-8: ";
+                std::cin >> k;
                 k--;
                 board.bestmove[2]=k;
                 cor=board.guardRails();
@@ -934,21 +1097,13 @@ int main() {
 			turn++;
 			AIturn=true;
 			}
-			        if(state==GAME_OVER_BLACK)
-            {
-            cout<<"Black Loses\n";
-            break;
-            }
-        if(state==GAME_OVER_WHITE)
-            {
-            cout<<"White Loses\n";
-            break;
-            }
-        cout<<  "\nassuming correct board and continue\n";
-        //cout << "\n is board correct? y for yes, n for no \n \n";
-        //cin >> ans;
+        std::cout<<  "\nassuming correct board and continue\n";
+        //std::cout << "\n is board correct? y for yes, n for no \n \n";
+        //std::cin >> ans;
 	}
-	cout<<"finished in "<<turn<<" turns";
-	cin>>ans;
+	std::cout<<"finished in "<<turn<<" turns";
+	std::cin>>ans;
 	return 0;
 }
+
+

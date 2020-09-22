@@ -44,8 +44,13 @@
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
 /**INCLUDE PARALELL PROCESSING??**/
+#include <algorithm>
+#include <chrono>
+#include <random>
+#include <ratio>
 /*Include Constants*/
 #include "const.h"
+using namespace std;
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
 /*dynamic globals, may alter as needed*/
 

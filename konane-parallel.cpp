@@ -20,7 +20,7 @@
 		 * so the first square in a column doesn't evaluate the Northern most move and the last square will not
 		 * evaluate the Southernmost... etc
 		 * ******************* RECURSIVE CALLS  ***************************
-		 * 5. if legalmove returns true, form node (recursibe call with new board) with move and repeat process board to obtain number.
+		 * 5. if legalmove returns true, form node (recursive call with new board) with move and repeat process board to obtain number.
 		 * it is a DFS.
 		 * 6. the calls eventually reach depth d and the SEF is run.  It is notable that the alpha and beta cutoffs will reduce the number of boards evaluated
 		 * WITHOUT any data loss.
@@ -44,7 +44,9 @@
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
 /**INCLUDE PARALELL PROCESSING??**/
-/**INCLUDE PARALELL PROCESSING??**/
+/**Bunch of random includes from development.
+Need to ditch the extra**/
+/**Best to check std library functions and get rid of namespace std.  Pretty sure it's currently in standard.h**/
 #include <algorithm>
 #include <chrono>
 #include <random>
@@ -54,21 +56,18 @@ using std::chrono::duration;
 using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::milli;
-/*Include Constants*/
+/**Some critical constants, including depth**/
 #include "const.h"
 using namespace std;
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
-/*dynamic globals, may alter as needed*/
+/**FUNCTIONAL WITH 14 DEPTH, EASE OF TESTING AT 12 OR 10 DEPTH, GAMEPLAY IS DIFFERENT DEPENDING ON IMPLEMENTATION**/
 
-/*AI TURN?*/
-/**FUNCTIONAL WITH 14 DEPTH, EASE OF TESTING AT 12 OR 10 DEPTH, GAMEPLAY IS DIFFERENT DEPENDING ON DEPTH**/
-int turn;
 
-//color is AI, humanColor is opponent
-/***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
-int AIcolor, humanColor;
+/** color is AI, humanColor is opponent by default, Zero Player Game has humanColor as second player**/
+/** Having these variables as globals makes some sense.  They're One and Done as far as being set.**/
+int AIcolor, humanColor; turn;
 /******************DUE TO FOLLOWING OFFICIAL RULES, COLOR HAS BEEN MERGED WITH FIRST**********************/
-/***(setters and getters, removed from code at the moment)***/
+/***(setters and getters, code took a different, and messier, path.***/
 /*int getFirst(){return first;}
  *int getColor() {return AIcolor;}
  *int getPlayerColor() {return playerColor;}
@@ -84,6 +83,7 @@ void player::jokes()
     int jokes;
     std::cout << "Would you like to play a game? \n";
 	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
+	/**might refactor out the joke, not everyone "gets" it**/
 	std::cin >> jokes;
 	if (jokes == 3) {
 		std::cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
@@ -91,7 +91,10 @@ void player::jokes()
 }
 
 void player::detectWL(int value){}
+/**Use to detect Win or Loss.  Needs work.  Parallel implementation is lazy here as well.**/
+/**No Win/Loss detection.  Black typically wins in ZPG and White is commonly declared winner.**/
 
+/**When in doubt, check standard.h ;) B and W are constants**/
 class board {
     public:
     int bval;
@@ -105,27 +108,54 @@ class board {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B}
 		};
-	/*all functions void functions until code is fully determined.*/
-     //is always maximizing
-
-	bool setZpgame();
-	bool setColor();
+     /**Zero Player Game (ZPG)**/
     bool zpgame;
+
+
+	/**Sets ZPG to true or false.*/
+	bool setZpgame();
+	/**Sets color global, and ALSO first global**/
+	bool setColor();
+
+	/**Meant to handhold the user to prevent incorrect moves.  Not completed, and may be implemented on frontend if/when this becomes more serious**/
     bool guardRails();
-	void setValues(int b, int w,int x,int dir);
-	 //returns first and color
+
+	/**Just what it is, a display function for the board**/
 	void display();
+
+	/**This has, unfortunately, been one of the most useful functions in the game....**/
 	void manualOverride(); //piece removal, for fixing board errors and for setup.
+
+	/**returns true for filled spaces, else, false**/
 	bool isFull(int i, int j);
-	//test for legality of move
+
+	/**Tests for legality of move being considered.  CRITICAL function for AlphaBetaMinimax**/
 	bool legal_move(int currentmove[], int i, int j, int Dir);
+
+	/**Same as legal_move, but testing at leaves of tree**/
 	bool legal_SEF(int i, int j, int Dir);
+
+	/**Every time a move is to be made (every singe time) this is called**/
 	void makeMove(int currentmove[], int playerColor);
+
+	/**every move made by Alpha Beta needs unmaking after the recursive call completes.**/
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
+
+	/**Straight up bread and butter Alpha Beta Minimax.  Explaining it will take too much space.  It's a real brain-twister, and that's what makes the whole project worthwhile.**/
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
+
+    /**SEF, currently taking a parameter that is basically dummy, plans for the future**/
     int SEF(int pass);
+
+
 	void selection(int S);
+
+	/**displays the array that contains the move either being considered or the actual move.**/
+	/**useful for troubleshooting, as is display**/
 	void displayMove();
+
+	/**compares boards.  A result of the multi-threading approach I took.  There may be nicer ways to do this, better thread choices... but this is controllable, less reckless**/
+	/**returns a board object to main, which contains the correct move.**/
     board comparison (board board1, board board2, board board3, board board4, board board5, board board6, board board7, board board8);
     void threadKonane(int i,int alpha, int beta, int depth, int levelColor);
     int calibrate(int i, int playerColor);

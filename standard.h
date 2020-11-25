@@ -6,6 +6,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <fstream>
+#include <vector>
+#include <utility>
 /**FOR PARALELL PROCESSING, ADD INCLUDE, DO ON LINUX BOX**/
 
 #endif // standard_h

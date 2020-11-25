@@ -20,7 +20,7 @@
 		 * so the first square in a column doesn't evaluate the Northern most move and the last square will not
 		 * evaluate the Southernmost... etc
 		 * ******************* RECURSIVE CALLS  ***************************
-		 * 5. if legalmove returns true, form node (recursibe call with new board) with move and repeat process board to obtain number.
+		 * 5. if legalmove returns true, form node (recursive call with new board) with move and repeat process board to obtain number.
 		 * it is a DFS.
 		 * 6. the calls eventually reach depth d and the SEF is run.  It is notable that the alpha and beta cutoffs will reduce the number of boards evaluated
 		 * WITHOUT any data loss.
@@ -46,10 +46,18 @@
 /**INCLUDE PARALELL PROCESSING??**/
 #include <algorithm>
 #include <chrono>
+#include <algorithm>
+#include <chrono>
 #include <random>
 #include <ratio>
+#include <thread>
+using std::chrono::duration;
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::milli;
 /*Include Constants*/
 #include "const.h"
+using namespace std;
 using namespace std;
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
 /*dynamic globals, may alter as needed*/
@@ -825,23 +833,46 @@ int board::SEF(int playerColor) {
 }
 
 
+void write_csv(double input[], int totalMoves){
+
+    // Make a CSV file with one or more columns of integer values
+    // Each column of data is represented by the pair <column name, column data>
+    //   as std::pair<std::string, std::vector<int>>
+    // The dataset is represented as a vector of these columns
+    // Note that all columns should be the same size
+
+    // Create an output filestream object
+    std::ofstream csv("normal-moves-14-1.csv");
+    csv<<"Turn, Time \n";
+    for(int i=0;i<totalMoves;i++){
+        csv<<i+1<<","<<input[i]<<"\n";
+    }
+
+
+    // Close the file
+    csv.close();
+}
+
 
 /*SHOULD CONSIDER MAKING MORE FUNCTIONS OUT OF THINGS IN MAIN!!*/
 int main() {
 
 	int Dir = 0;
 	int level=0;
-	int i,j,k,m, alpha, beta, state;
-
+	int turn=0;
+	int i,j,k,m,z, alpha, beta, state;
+	double tc;
+    double csv[50];
+    duration<double> timeCount;
     char correct, ans;
-	bool first, AIturn, ingameState, right;
+	bool first, AIturn, right;
 	bool cor=true;
 	player player;
 	board board;
 	/**odd numbered depths are on min nodes, even on max. This doesn't work.**/
 	cout<<"depth = "<< depth<<". (This should be an even number)\n";
 	cout<<"\n";
-	ingameState = true;
+
 
 	player.jokes();
 	right=board.setZpgame();
@@ -857,9 +888,12 @@ int main() {
 	}
 	/**SETS BOARD UP**/
     board.manualOverride();
-	while (ingameState == true) {
-        cout<<"\nSEF = " <<state <<"\n";
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	while (true) {
+
+        //cout<<"\nSEF = " <<state <<"\n";
 		if (AIturn) {
+                high_resolution_clock::time_point tpre = high_resolution_clock::now();
                 //ERROR ON FIRST AND SECOND PARAMETERS?
 			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
 			board.display();
@@ -884,10 +918,16 @@ int main() {
 			board.display();
 			AIturn = false;
 			turn++;
-			cout<<"\nSEF = " <<state <<"\n";
+            high_resolution_clock::time_point tpost = high_resolution_clock::now();
+			timeCount = duration_cast<duration<double>>(tpost-tpre);
+            tc=timeCount.count();
+            std::cout<<"\n"<<tc<<"\n";
+            csv[turn-1]=tc;
+			//cout<<"\nSEF = " <<state <<"\n";
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             else if((right) && (AIturn==false)){
+            high_resolution_clock::time_point tpre = high_resolution_clock::now();
             state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
 			board.display();
 			if (state== WIN)
@@ -909,6 +949,11 @@ int main() {
 			board.display();
 			AIturn = true;
 			turn++;
+            high_resolution_clock::time_point tpost = high_resolution_clock::now();
+            timeCount = duration_cast<duration<double>>(tpost-tpre);
+            tc=timeCount.count();
+            std::cout<<"\n"<<tc<<"\n";
+            csv[turn-1]=tc;
             }
             /** if PLAYING A HUMAN**/
 		else {
@@ -954,7 +999,12 @@ int main() {
         //cout << "\n is board correct? y for yes, n for no \n \n";
         //cin >> ans;
 	}
-	cout<<"finished in "<<turn<<" turns";
-	cin>>ans;
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	 duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	std::cout<<"finished in "<<turn<<" turns";
+    std::cout << "It took me " << time_span.count() << " seconds.";
+    for(z=0;z<turn;z++)
+    {std::cout<<"turn " <<z+1<< " took "<<csv[z]<<" seconds \n";}
+    write_csv(csv, turn);
 	return 0;
 }

@@ -31,47 +31,37 @@
 		 *
 		 * 7. The SEF evaluates partly by counting legal moves for player in that state.
 		 * Additionally, it counts pieces and estimates based on expected piece balance (each move must remove one piece, if more pieces are missing a
-		 * double move has occurred.  The SEF assumes that this is always bad for the player who had this happen.)
+		 * double move has occurred.  The SEF assumes that this is bad for the player who had this happen to it.)
 		 *
 		 * The SEF value is passed up to the top of the tree with varied modifications, minimizing levels take the lowest value to pass, maximizing
 		 * will take up the largest values
 		 *
-		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
+		 * Dir can = 0 for N (up), 1 for E(right), 2 for S (down), 3 for W (left)
 		 */
 
 
 
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "standard.h"
-/**INCLUDE PARALELL PROCESSING??**/
-/**INCLUDE PARALELL PROCESSING??**/
-#include <algorithm>
-#include <chrono>
-#include <random>
-#include <ratio>
-#include <thread>
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::milli;
-/*Include Constants*/
+
+/*Include Constants, depth is defined at compile time, as are some*/
 #include "const.h"
-using namespace std;
+
+
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
-/*dynamic globals, may alter as needed*/
 
-/*AI TURN?*/
-/**FUNCTIONAL WITH 14 DEPTH, EASE OF TESTING AT 12 OR 10 DEPTH, GAMEPLAY IS DIFFERENT DEPENDING ON DEPTH**/
 
-//color is AI, humanColor is opponent
+/**FUNCTIONAL WITH 16 DEPTH, EASE OF TESTING AT 14 OR 12 DEPTH, GAMEPLAY IS DIFFERENT DEPENDING ON DEPTH**/
+
+/**color is AI, humanColor is opponent**/
+
 /***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
 int AIcolor, humanColor;
 /******************DUE TO FOLLOWING OFFICIAL RULES, COLOR HAS BEEN MERGED WITH FIRST**********************/
-/***(setters and getters, removed from code at the moment)***/
+/***(setters and getters, removed from code at this time)***/
 /*int getFirst(){return first;}
  *int getColor() {return AIcolor;}
  *int getPlayerColor() {return playerColor;}
- *int getDepth() {return depth;}
  */
 class player{
 public:
@@ -93,7 +83,10 @@ void player::detectWL(int value){}
 
 class board {
     public:
+    //records best value, used for parallel root
     int bval;
+    //2D array, Black and white pieces value B= 2 and W= 1 respectively
+    //empty spaces will be treated as zeros.
 	int objBoard[8][8] = {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B},
@@ -104,30 +97,69 @@ class board {
 		{B,W,B,W,B,W,B,W},
 		{W,B,W,B,W,B,W,B}
 		};
-	/*all functions void functions until code is fully determined.*/
      //is always maximizing
-
-	bool setZpgame();
-	bool setColor();
+     //sets zero player game
     bool zpgame;
+	bool setZpgame();
+
+	//Sets both color and first player.
+	bool setColor();
+
+    //returns first and color
     bool guardRails();
+
+    //returns first and color
 	void setValues(int b, int w,int x,int dir);
-	 //returns first and color
+
+	 //displays board
 	void display();
-	void manualOverride(); //piece removal, for fixing board errors and for setup.
+
+	//piece removal, for fixing board errors and for setup
+	void manualOverride();
+
+	//returns True if a space is full, False if it is not.
 	bool isFull(int i, int j);
+
 	//test for legality of move
 	bool legal_move(int currentmove[], int i, int j, int Dir);
+	//tests for legality of move inside the SEF (uses different logic) Uses isFull to do checks
 	bool legal_SEF(int i, int j, int Dir);
+	/*
+	 *makes a move at each node and also makes the chosen move in the game.
+	 *currentmove[] is passed along with player color to make the move.
+	 *makeMove MUST receive correct input, as it assumes such
+	 *this is handled by other functions in the case of a user.
+	 */
 	void makeMove(int currentmove[], int playerColor);
+
+	//unmakes a move after a move is chosen.
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
+
+	//serial variation of alphaBetaMinimax Check design document for more information
+	//level is the level it is at, depth is the level to which it will travel
+	//levelColor is the color being examined at this level
+	//maximizing is whether or not it is maximizing (true = max, false = min)
     int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
+
+    //State Evaluation Function.  Does not work alone, uses legal_SEF pass is for future modifications
     int SEF(int pass);
+
+    //Checks if chosen move by player is on the board.
 	void selection(int S);
+
+	//Displays move numerically
 	void displayMove();
+
+	//Compares 8 boards at root of tree (needed, serial implementation) returns board with highest bvalue (bval) after each board is done
     board comparison (board board1, board board2, board board3, board board4, board board5, board board6, board board7, board board8);
+
+    //Called on each thread, imitates the maximizing node of the tree.
     void threadKonane(int i,int alpha, int beta, int depth, int levelColor);
+
+    //Calibrates the for loop that loops through the board for moves.  Checks moves that player
+    //or opponent will make based on the node.
     int calibrate(int i, int playerColor);
+
 	//RECORDS MOVES BESTMOVE HOLDS FIRST MOVE AND THEN ANY MOVE THAT IS BETTER.
 	int bestmove[4];
 	int playermove[4];
@@ -155,6 +187,8 @@ for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 					//calls for minimization using the opposing color
 					temp = val;
 					//needs some work.
+
+					//calling serial variation
 					val = max(val, alphaBetaMinimax(alpha, beta, 1, depth, opColor, false));
 
 
@@ -168,19 +202,13 @@ for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
                     //could remove from other code.
 					alpha = max(alpha, val);
                         if (temp < val) {
-                            bval=val; //add a bval variable to board.
+                            bval=val;
+                            //the best move is the highest scoring move selected
                             bestmove[0] = currentmove[0];
                             bestmove[1] = currentmove[1];
                             bestmove[2] = currentmove[2];
                             bestmove[3] = currentmove[3];
                         }
-					//Alpha cutoff
-					//DO WE NEED AN ALPHA CUTOFF IF PARALLEL?
-					//THERE WILL NEVER BE AN UNEXPLORED MOVE AT ROOT
-					//CUTOFFS WILL DEFINITELY HAPPEN LOWER IN TREE
-					/*if (beta <= alpha) {
-                        return alpha;
-						}*/
 				}
 			}
 		}
@@ -193,6 +221,7 @@ return;
 /***ALPHABETA MINIMAX BELOW***/
 
 /***NEEDS FULL REFACTOR FOR THE PURPOSE OF ZERO PLAYER GAME***/
+//for clarifications, refer to user doc.
 int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing)
 {
 	int k, m, tshoot, temp;
@@ -210,7 +239,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 			return tshoot;
 	}
 	else if (maximizing == true)
-	{/*PROBLEM!!!????*/
+	{
 		int val = MIN;
 
 		for (int i = 0; i < 8; i++)
@@ -301,7 +330,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	std::cout << "ERROR";
 	return -1;
 }
-
+// returns best board, to be set as correct board.  Resource intensive.  Has to be a better way.
 board board::comparison (board board1, board board2, board board3, board board4, board board5, board board6, board board7, board board8)
 {
     if (board1.bval<board2.bval)
@@ -342,6 +371,9 @@ board board::comparison (board board1, board board2, board board3, board board4,
 
     return board1;
 }
+
+//for for loops, to allow for checking less squares and to ensure the right squares on
+//a checkerboard are checked.
 int board::calibrate(int i, int playerColor)
 {
 	if (playerColor == 2)
@@ -353,10 +385,11 @@ int board::calibrate(int i, int playerColor)
 }
 
 /**ZERO PLAYER GAME SELECTION**/
+//Sets up a zero player game for the AI
 bool board::setZpgame(){
     char ans;
     do{
-        std::cout<<"Will I be playing Myself? \ny/n\n";
+        std::cout<<"Will I be playing Myself?\ny/n\n";
         std::cin>>ans;
         if (ans=='y'){
         return true;
@@ -364,10 +397,13 @@ bool board::setZpgame(){
     else if(ans == 'n'){
         return false;
         }
-        else{}
+        else{
+            std::cout<<"choose only y or n please";
+        }
     }while (true);
 
 }
+
 /**SAFETY FOR USER ERRORS**/
 bool board::guardRails(){
     bool correct=false;
@@ -376,19 +412,22 @@ bool board::guardRails(){
     j=bestmove[1];
     k=bestmove[2];
     m=bestmove[3];
+    //check for horizontal movement
     if(i==k||j==m){
-        i=(i-k)%2;
-        j=(j-m)%2;
-        i=i-j;
-        if (i==0)
+        //check for even number of squares traversed, if zero, then move is probably legal.
+        i=(abs(i-k))%2;
+        j=(abs(j-m))%2;
+
+        if (i==0&&j==0)
         {
             return true;
         }
-        std::cout<<"incorrect move";
-        return false;
+
     }
-    return true;
+    std::cout<<"incorrect move";
+    return false;
 }
+
 /***ASSISTS MANUAL OVVERIDE***/
 void board::selection(int S) {
 	int i, j;
@@ -533,6 +572,8 @@ void board::display() {
 		std::cout << "\n";
 	}
 }
+
+//displays move as a numerical value corresponding to the numerical indexes on the board.
 void board::displayMove(){
 std::cout<<"\n"<<bestmove[0]+1<<", ";
 std::cout<<bestmove[1]+1<<", to ";
@@ -541,10 +582,11 @@ std::cout<<bestmove[3]+1<<", \n your move\n";
 }
 /***       TESTS LEGALITY OF MOVE FOR SEF        ***/
 
-/***State Evaluation form of Legal Move.         ***
-*** Exists for the purposes of tallying possible ***
-*** moves, this is sufficient a refactor         ***
-*** may be desirable.  ZERO PLAYER GAME AGNOSTIC ***/
+/***State Evaluation helper, a form of Legal Move.***
+*** Exists for the purposes of tallying possible  ***
+*** moves at depth of tree                        ***/
+
+/**CLUMSY, REFACTOR**/
 bool board::legal_SEF(int i, int j, int Dir)
 {
 	int k = i;
@@ -612,9 +654,12 @@ bool board::legal_SEF(int i, int j, int Dir)
 	return false;
 }
 
-/***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED      ***
- ***MESSY, REFACTOR IF TIME, IT IS COLOR AGNOSTIC     ***/
-
+/***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED
+ ***MESSY, REFACTOR IF TIME, IT IS COLOR AGNOSTIC
+ **Takes advantage of array being altered and then
+ **passed out of function
+ **i, j = source co-ords.  k,m = destination coords
+ **/
 bool board::legal_move(int currentmove[], int i, int j, int Dir)
 {
     bool state;
@@ -624,6 +669,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 	{
 		if (k > 1) {
             k--;
+            //looks for single jump, calls isFull to check if that space is empty or full.
             state = isFull(k, m);
             if (state == true) {
 				k--;
@@ -635,6 +681,7 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
                 currentmove[3] = m;
                     if(k>1){
                         k--;
+                        //looks for double jump
                         state = isFull(k, m);
                         if (state == true) {
                             k--;
@@ -753,8 +800,13 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 /***ASSUMES LEGAL MOVE HAS BEEN EXECUTED,***
 /***MAKES MOVE RECORDED BY LEGAL MOVE    ***/
 
-/** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME **/
+/** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME
+  *i,j is indexes of source of piece. k, m is destination (i,j coord)
+  *currentmove[] is the move being investigated by the Minimax algorithim.
+  *playerColor is the color of the moving piece.
+ **/
 void board::makeMove(int currentmove[], int playerColor)
+    //takes
 {   //std::cout<<"making move\n";
     int i,j,k,m;
     bool neq;
@@ -797,7 +849,7 @@ void board::makeMove(int currentmove[], int playerColor)
 }
 
 /**UNMAKE MOVE IS COLOR-AGNOSTIC, ZERO PLAYER GAME WILL NOT REQUIRE A CHANGE HERE**/
-
+//Same effect as make move, only in reverse.
 void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
     int i,j,k,m;
     bool neq=true;
@@ -869,7 +921,6 @@ the utility(best/worst) value of the node is returned.
 
 
 
-/**TO ACHIEVE ZERO PLAYER GAME, THE SEF NEEDS EDITS**/
 
 int board::SEF(int playerColor) {
 	int sum=0;    //sum of total moves for SEF player
@@ -885,10 +936,11 @@ int board::SEF(int playerColor) {
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = calibrate(i, playerColor); j < 8; j = j + 2)
-		{
+		{   //If there is a AI piece on the board, increment pb
 			if (objBoard[i][j] > 0)
 			{
 			    pb++;
+			    //check moves for AI, increment sum if legal_SEF returns true
 				for (int Dir = 0; Dir < 4; Dir++) {
 					if (legal_SEF(i, j, Dir)) {
 						sum++;
@@ -902,10 +954,11 @@ int board::SEF(int playerColor) {
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = calibrate(i, opColor); j < 8; j = j + 2)
-		{
+		{   //If there is a Player piece on the board here, decrement pb
 			if (objBoard[i][j] > 0)
 			{
 			    oPiece++;
+			    //check moves for opponent, decrement sum if legal_SEF returns true
 				for (int Dir = 0; Dir < 4; Dir++) {
 					if (legal_SEF(i, j, Dir)) {
 						sum--;
@@ -927,9 +980,7 @@ void write_csv(double input[], int totalMoves){
 
     // Make a CSV file with one or more columns of integer values
     // Each column of data is represented by the pair <column name, column data>
-    //   as std::pair<std::string, std::vector<int>>
     // The dataset is represented as a vector of these columns
-    // Note that all columns should be the same size
 
     // Create an output filestream object
     std::ofstream csv("parallel-moves-14-1.csv");
@@ -945,17 +996,21 @@ void write_csv(double input[], int totalMoves){
 
 
 
-/*SHOULD CONSIDER MAKING MORE FUNCTIONS OUT OF THINGS IN MAIN!!*/
+/**TODO:: TOO MUCH IN MAIN!! REFACTOR!!**/
+
 int main() {
 	int Dir = 0;
 	int level=0;
 	int turn=0;
 	int i,j,k,m,z, alpha, beta, state;
 	double tc;
+	//for recording time
     double csv[50];
     duration<double> timeCount;
     char correct, ans;
+    //who is first, whose turn is it?
 	bool first, AIturn, right;
+	//
 	bool cor=true;
 	player player;
 	board board, board1, board2, board3, board4, board5, board6, board7, board8;
@@ -964,10 +1019,12 @@ int main() {
 	std::cout<<"\n";
 
 	player.jokes();
+	//Zero Player Game?
 	right=board.setZpgame();
 	if (right){
         board.zpgame=true;
 	}
+	//Who is black, goes first?
 	first=board.setColor();
 	if (first == true) {
 		AIturn = true;
@@ -977,6 +1034,7 @@ int main() {
 	}
 	/**SETS BOARD UP**/
     board.manualOverride();
+    /**SETS UP BOARDS FOR THREADS**/
     board1=board;
     board2=board;
     board3=board;
@@ -985,21 +1043,22 @@ int main() {
     board6=board;
     board7=board;
     board8=board;
+    //Starts the clock.
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	while (true) {
-        if(board.bval<-500){
-            if(AIcolor=1)
-            {
-                std::cout<<"Game Over, Black loses";
-            }
-            else
-            {
-                std::cout<<"Game over, White loses";
-            }
-        break;
-        }
+            //if all moves lose.
 
+        if(board.bval<-500){
+            std::cout<<"Game over, White loses";
+            break;
+                }
 		if (AIturn) {
+            /**This should be refactored into a function.
+            *This initializes every board object to the same state, starts the clock on the move and
+            *makes the **/
+
+
+
             high_resolution_clock::time_point tpre = high_resolution_clock::now();
             board1=board;
             board2=board;
@@ -1009,6 +1068,9 @@ int main() {
             board6=board;
             board7=board;
             board8=board;
+            //Initiates threads, calls them on the rows of the board
+            //Alpha and Beta NOT set to Min and Max at first call.  This has improved efficiency and reduced error.
+            //They ARE set to MAX and MIN later.
 			thread th1( &board::threadKonane, &board1, 0, 1,2,depth,AIcolor);
 			thread th2( &board::threadKonane, &board2, 1, 1,2,depth,AIcolor);
 			thread th3( &board::threadKonane, &board3, 2, 1,2,depth,AIcolor);
@@ -1017,6 +1079,8 @@ int main() {
 			thread th6( &board::threadKonane, &board6, 5, 1,2,depth,AIcolor);
 			thread th7( &board::threadKonane, &board7, 6, 1,2,depth,AIcolor);
 			thread th8( &board::threadKonane, &board8, 7, 1,2,depth,AIcolor);
+
+			//Joins threads to main program after program run (some efficiencies to realize here).
 			th1.join();
 			th2.join();
 			th3.join();
@@ -1025,33 +1089,40 @@ int main() {
 			th6.join();
 			th7.join();
 			th8.join();
-			board = board.comparison(board1, board2, board3, board4, board5, board6, board7, board8);
+			//makes a comparison between the 8 boards and selects the ideal board from them
+            board = board.comparison(board1, board2, board3, board4, board5, board6, board7, board8);
+            //displays prior board
+			board.display();
+			//if no valid moves
+            if(board.bval<-500){
+                cout<<"Game Over, Black Loses";
+                break;
+                }
+
+            //Uses the "bestmove" array to make the move chosen by algorithim
+            board.makeMove(board.bestmove, AIcolor);
+            //displays the move in start i, start j, destination i, destination j, format.
+            board.displayMove();
+            //displays the board
 			board.display();
 
-            board.makeMove(board.bestmove, AIcolor);
-            board.displayMove();
-			board.display();
+			//Passes turn
 			AIturn = false;
+			//increments turn counter
 			turn++;
+			//stops clock and counts value
 			high_resolution_clock::time_point tpost = high_resolution_clock::now();
 			timeCount = duration_cast<duration<double>>(tpost-tpre);
             tc=timeCount.count();
+            //gives amount of time taken
             std::cout<<"\n"<<tc<<"\n";
+            //records time and turn to array
             csv[turn-1]=tc;
-            if(board.bval<-500){
-                if(AIcolor=1)
-                {
-                    std::cout<<"Game Over, Black loses";
-                }
-                else
-                {
-                    std::cout<<"Game over, White loses";
-                }
-                break;
-            }
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
+            //same as above
             if((right) && (AIturn==false)){
+
                 high_resolution_clock::time_point tpre = high_resolution_clock::now();
                 board1=board;
                 board2=board;
@@ -1079,52 +1150,55 @@ int main() {
                 th8.join();
                 board = board.comparison (board1, board2, board3, board4, board5, board6, board7, board8);
                 board.display();
-
-				board.makeMove(board.bestmove, humanColor);
-				board.displayMove();
+                //if no valid moves
+                if(board.bval<-500){
+                std::cout<<"Game over, White loses";
+                break;
+                }
+                board.makeMove(board.bestmove, humanColor);
+                board.displayMove();
 
                 board.display();
+
+
                 AIturn = true;
                 turn++;
+                //record timing.
                 high_resolution_clock::time_point tpost = high_resolution_clock::now();
                 timeCount = duration_cast<duration<double>>(tpost-tpre);
                 tc=timeCount.count();
                 std::cout<<"\n"<<tc<<"\n";
                 csv[turn-1]=tc;
-                if(board.bval<-500){
-                    if(humanColor=2)
-                    {
-                        cout<<"Game Over, Black loses";
-                    }
-                    else
-                    {
-                        cout<<"Game over, White loses";
-                    }
-                    break;
-                }
                 }
             /** if PLAYING A HUMAN**/
 		if((!right) && (AIturn==false)) {
             do{
                 std::cout << "\nenter piece to move column, 1-8: ";
+                //source column
                 std::cin >> j;
                 //accomodate indexing
                 j--;
+                //enters player move into array
                 board.bestmove[1]=j;
                 std::cout << "\nenter piece to move row, 1-8: ";
                 std::cin >> i;
                 i--;
+                //source row
                 board.bestmove[0]=i;
                 std::cout << "\nenter piece destination column, 1-8: ";
                 std::cin >> m;
                 m--;
+                //destination column
                 board.bestmove[3]=m;
                 std::cout << "\nenter piece destination row, 1-8: ";
                 std::cin >> k;
                 k--;
+                //destination row
                 board.bestmove[2]=k;
-                cor=board.guardRails();
+
             }while(! cor);
+            //is this move legal?
+            cor=board.guardRails();
 
 			board.makeMove(board.bestmove,humanColor);
 			board.displayMove();
@@ -1133,8 +1207,6 @@ int main() {
 			AIturn=true;
 			}
         std::cout<<  "\nassuming correct board and continue\n";
-        //std::cout << "\n is board correct? y for yes, n for no \n \n";
-        //std::cin >> ans;
 	}
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	 duration<double> time_span = duration_cast<duration<double>>(t2 - t1);

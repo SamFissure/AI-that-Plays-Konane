@@ -135,11 +135,14 @@ class board {
 	//unmakes a move after a move is chosen.
 	void unmakeMove(int currentmove[], int playerColor, int opColor);
 
-	//serial variation of alphaBetaMinimax Check design document for more information
-	//level is the level it is at, depth is the level to which it will travel
+	//serial variation of alphaBetaMinimax, divided into Min and Max (change 12/22/2020)
+	//Check design document for more information
+	//level is the level it is processing, depth is the level to which it will travel
 	//levelColor is the color being examined at this level
-	//maximizing is whether or not it is maximizing (true = max, false = min)
-    int alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing);
+
+    int ABMin(int alpha, int beta, int level, int depth, int levelColor);
+
+    int ABMax(int alpha, int beta, int level, int depth, int levelColor);
 
     //State Evaluation Function.  Does not work alone, uses legal_SEF pass is for future modifications
     int SEF(int pass);
@@ -189,7 +192,7 @@ for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 					//needs some work.
 
 					//calling serial variation
-					val = max(val, alphaBetaMinimax(alpha, beta, 1, depth, opColor, false));
+					val = max(val, ABMin(alpha, beta, 1, depth, opColor));
 
 
 					unmakeMove(currentmove, levelColor, opColor);
@@ -222,9 +225,9 @@ return;
 
 /***NEEDS FULL REFACTOR FOR THE PURPOSE OF ZERO PLAYER GAME***/
 //for clarifications, refer to user doc.
-int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing)
+int board::ABMax(int alpha, int beta, int level, int depth, int levelColor)
 {
-	int k, m, tshoot, temp;
+int k, m, tshoot, temp;
 	/* Initial values of
 	 * Alpha and Beta
 	 * Terminating condition. i.e
@@ -238,8 +241,6 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 			//std::cout << "\nSEF= " << tshoot << "\n";
 			return tshoot;
 	}
-	else if (maximizing == true)
-	{
 		int val = MIN;
 
 		for (int i = 0; i < 8; i++)
@@ -254,7 +255,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							makeMove(currentmove, levelColor);
 							//calls for minimization using the opposing color
 							temp = val;
-							val = std::max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
+							val = std::max(val, ABMin(alpha, beta, level+1, depth, opColor));
 							unmakeMove(currentmove, levelColor, opColor);
 							/**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
 							/**IF CURRENT MOVE BEST, CHANGE MOVE**/
@@ -282,11 +283,16 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		}
 
     return val;
-	}
-	else
-	{
-		//std::cout << "minimizing \n";
-		int val = MAX;
+}
+
+int board::ABMin(int alpha, int beta, int level, int depth, int levelColor)
+{
+    int val = MAX;
+    int opColor = levelColor%2;
+    opColor++;
+    /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
+	int currentmove[4];
+
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
@@ -303,7 +309,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
                             */
 
 							makeMove(currentmove, levelColor);
-							val = std::min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
+							val = std::min(val, ABMax(alpha, beta, level+1, depth, opColor));
 							beta = std::min(beta, val);
 							unmakeMove(currentmove, levelColor, opColor);
 							// Alpha Beta Pruning
@@ -318,17 +324,9 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		}
 		if (val == MAX)
 		{
-
-			/*ran out of moves on mimimzer
-			**The SEF needs tuning, but MAY work here
-			**(some assumptions have been made here)
-			**once tuned, it should perform ideally*/
 			return WIN;
 		}
 		return val;
-	}
-	std::cout << "ERROR";
-	return -1;
 }
 // returns best board, to be set as correct board.  Resource intensive.  Has to be a better way.
 board board::comparison (board board1, board board2, board board3, board board4, board board5, board board6, board board7, board board8)

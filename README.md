@@ -1,31 +1,24 @@
 # Konane AI 
 # Made by Tafroze and Sam (Robert).
 A.I. that plays Konane at a high level of expertise
---------------------------------------------------------------------------------
-AS OF 3/25/2020 THE COMPETITION HAS PASSED AND THIS IS PURE HOBBYIST!!
 __________________________________________________________________________________________________________________________________
 At the moment, the program will not work unless launched from an IDE (such as CodeBlocks or Visual Studio.  This will be fixed in future iterations of the code.
 __________________________________________________________________________________________________________________________________
 Competition variation:
 
-We broke some OOP rules (some things made public, some global variables) in the name of processing speed (stackoverflow indicated that globals often improve performance.)
+We broke some OOP rules (some things made public, some global variables, only one class) in the name of processing speed (stackoverflow indicated that globals often improve performance.)
 
 For the tournament, the AI must move in 15 seconds or forfeit.  
-Time to move seems to double with each successive move for the first few moves, which caused some needed adaptations to solve the issue.
-Some experimentation should be able to verify this result.
-
-Konane.cpp is an effective AI, but not optimal, this will be fixed in the hobbyist phase
 __________________________________________________________________________________________________________________________________
-This is now hobbyist.
+This is now hobbyist & has moved beyond tournament play.
 What that means for the code:
 This code will be refactored in the following ways
 1. it will become more OOP where possible, 
 some global constants MAY become class-member variables.  Other alterations will be made to improve modularity and user-friendliness.
-2. a zero-player game will be implemented to evaluate and enhance State Evaluation Functions and to test.
-3. the SEF will be enhanced to fix some outputted values that are unexpected.
-4. Code may be refactored to reduce work done by recursive function.
-5. The program will be better timed out so as to verify performance, though the 15 second requirement will be dropped.
+2. a zero-player game HAS BEEN implemented to evaluate and enhance State Evaluation Functions and to test.
+3. the SEF HAS BEEN enhanced to fix some outputted values that are unexpected.
+4. Code HAS BEEN refactored to reduce work done by recursive function.
+5. The program will HAS BEEN better timed out so as to verify performance, though the 15 second requirement will be dropped.  Further analysis and optimizations are ongoing.
 
 :::TODO:::
-FIX BIG O ISSUE.  It takes far too long to make a move mid-game.
-ZERO PLAYER GAME. The ZPG seems to function.  Big-O problems must be fixed for futher testing.
+FIX BIG O ISSUE.  It takes far too long to make a move early-game.

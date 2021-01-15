@@ -1,8 +1,6 @@
 # Konane AI 
 # Made by Tafroze and Sam (Robert).
-A.I. that plays Konane at a high level of expertise
-__________________________________________________________________________________________________________________________________
-At the moment, the program will not work unless launched from an IDE (such as CodeBlocks or Visual Studio.  This will be fixed in future iterations of the code.
+A.I. that plays Konane at a high level of expertise (Codeblocks/MinGW seem to be required to make this work.  Bugs to fix... sigh)
 __________________________________________________________________________________________________________________________________
 Competition variation:
 

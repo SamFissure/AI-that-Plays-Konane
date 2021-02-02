@@ -13,10 +13,7 @@ What that means for the code:
 This code will be refactored in the following ways
 1. it will become more OOP where possible, 
 some global constants MAY become class-member variables.  Other alterations will be made to improve modularity and user-friendliness.
-2. a zero-player game HAS BEEN implemented to evaluate and enhance State Evaluation Functions and to test.
-3. the SEF HAS BEEN enhanced to fix some outputted values that are unexpected.
-4. Code HAS BEEN refactored to reduce work done by recursive function.
-5. The program will HAS BEEN better timed out so as to verify performance, though the 15 second requirement will be dropped.  Further analysis and optimizations are ongoing.
 
 :::TODO:::
 FIX BIG O ISSUE.  It takes far too long to make a move early-game.
+Improve Parellel implementation.  While the game is thread-safe, some threads are not being utilized well.

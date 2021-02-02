@@ -41,23 +41,10 @@
 
 
 
-/* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
-#include "standard.h"
-/**INCLUDE PARALELL PROCESSING??**/
-#include <algorithm>
-#include <chrono>
-#include <algorithm>
-#include <chrono>
-#include <random>
-#include <ratio>
-#include <thread>
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::milli;
+/* STANDARD AND CUSTOM INCLUDES FROM LIBRARY FILES AND NAMESPACE */
+#include "myincludes.h"
 /*Include Constants*/
 #include "const.h"
-using namespace std;
 using namespace std;
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
 /*dynamic globals, may alter as needed*/

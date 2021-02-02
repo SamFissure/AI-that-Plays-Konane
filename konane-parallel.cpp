@@ -42,7 +42,10 @@
 
 
 /* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
-#include "standard.h"
+#include "myincludes.h"
+
+//Includes for parallel processing
+#include "parallelincludes.h"
 
 /*Include Constants, depth is defined at compile time, as are some*/
 #include "const.h"
@@ -65,23 +68,41 @@ int AIcolor, humanColor;
  */
 class player{
 public:
-    void jokes();
-    void detectWL(int value);
+    void wargamesReference();
 };
-void player::jokes()
+
+void player::wargamesReference()
 {
     int jokes;
     std::cout << "Would you like to play a game? \n";
-	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
+	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War (Obligatory Wargames Reference)\n";
 	std::cin >> jokes;
 	if (jokes == 3) {
 		std::cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
 }
 
-void player::detectWL(int value){}
 
-class board {
+
+
+class util{
+    public:
+    int calibrate(int i, int playerColor);
+};
+//for for loops, to allow for checking less squares and to ensure the right squares on
+//a checkerboard are checked.
+int util::calibrate(int i, int playerColor)
+{
+	if (playerColor == 2)
+        {return i % 2;}
+	//starting index of an even i will be 0
+	else
+	//starting index of an even i will be 1
+        {return (i + 1) % 2;}
+}
+
+
+class board : public util {
     public:
     //records best value, used for parallel root
     int bval;
@@ -161,7 +182,7 @@ class board {
 
     //Calibrates the for loop that loops through the board for moves.  Checks moves that player
     //or opponent will make based on the node.
-    int calibrate(int i, int playerColor);
+
 
 	//RECORDS MOVES BESTMOVE HOLDS FIRST MOVE AND THEN ANY MOVE THAT IS BETTER.
 	int bestmove[4];
@@ -370,17 +391,6 @@ board board::comparison (board board1, board board2, board board3, board board4,
     return board1;
 }
 
-//for for loops, to allow for checking less squares and to ensure the right squares on
-//a checkerboard are checked.
-int board::calibrate(int i, int playerColor)
-{
-	if (playerColor == 2)
-        {return i % 2;}
-	//starting index of an even i will be 0
-	else
-	//starting index of an even i will be 1
-        {return (i + 1) % 2;}
-}
 
 /**ZERO PLAYER GAME SELECTION**/
 //Sets up a zero player game for the AI
@@ -1016,7 +1026,7 @@ int main() {
 	std::cout<<"depth = "<< depth<<". (This should be an even number)\n";
 	std::cout<<"\n";
 
-	player.jokes();
+	player.wargamesReference();
 	//Zero Player Game?
 	right=board.setZpgame();
 	if (right){

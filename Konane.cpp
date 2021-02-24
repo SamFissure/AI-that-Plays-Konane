@@ -57,13 +57,9 @@ int turn;
 /***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
 int AIcolor, humanColor;
 /******************DUE TO FOLLOWING OFFICIAL RULES, COLOR HAS BEEN MERGED WITH FIRST**********************/
-/***(setters and getters, removed from code at the moment)***/
-/*int getFirst(){return first;}
- *int getColor() {return AIcolor;}
- *int getPlayerColor() {return playerColor;}
- *int getDepth() {return depth;}
- */
+
 #include "board.cpp"
+
 class player{
 public:
     void jokes();
@@ -150,7 +146,7 @@ int main() {
 		if (AIturn) {
                 high_resolution_clock::time_point tpre = high_resolution_clock::now();
                 //ERROR ON FIRST AND SECOND PARAMETERS?
-			state=board.alphaBetaMinimax(1, 2, level, depth, AIcolor, true);
+			state=board.ABMax(1, 2, level, depth, AIcolor);
 			board.display();
 
         if (state== WIN)
@@ -183,7 +179,7 @@ int main() {
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             else if((right) && (AIturn==false)){
             high_resolution_clock::time_point tpre = high_resolution_clock::now();
-            state=board.alphaBetaMinimax(1, 2, level, depth, humanColor, true);
+            state=board.ABMax(1, 2, level, depth, humanColor);
 			board.display();
 			if (state== WIN)
 			{

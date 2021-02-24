@@ -1,12 +1,74 @@
 
 #include "board.h"
 
+/**Parallel Elements not used in Konane**/
+int board::calibrate(int i, int playerColor)
+{
+	if (playerColor == 2)
+        {return i % 2;}
+	//starting index of an even i will be 0
+	else
+	//starting index of an even i will be 1
+        {return (i + 1) % 2;}
+}
+
+void board::threadKonane(int i,int alpha, int beta, int depth, int levelColor){
+int k, m, temp;
+   int opColor = levelColor%2;
+    opColor++;
+    /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
+	int currentmove[4];
+	int val = MIN;
+    bval= MIN;
+for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
+	{
+		if (objBoard[i][j] > 0)
+		{
+			for (int Dir = 0; Dir < 4; Dir++) {
+				if (legal_move(currentmove, i, j, Dir)) {
+					/*****MOVE PIECE*****/
+					makeMove(currentmove, levelColor);
+					//calls for minimization using the opposing color
+					temp = val;
+					//needs some work.
+
+					//calling serial variation
+					val = max(val, ABMin(alpha, beta, 1, depth, opColor));
+
+
+					unmakeMove(currentmove, levelColor, opColor);
+
+                    /**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
+					/**IF CURRENT MOVE BEST, CHANGE MOVE**/
+                    //This normally happens at depth zero
+                    //This IS "depth zero" as far as the code
+                    //is concerned, hence this can happen here.
+                    //could remove from other code.
+					alpha = max(alpha, val);
+                        if (temp < val) {
+                            bval=val;
+                            //the best move is the highest scoring move selected
+                            bestmove[0] = currentmove[0];
+                            bestmove[1] = currentmove[1];
+                            bestmove[2] = currentmove[2];
+                            bestmove[3] = currentmove[3];
+                        }
+				}
+			}
+		}
+	}
+	//cout<<"SEF of thread "<<i<<" = "<<bval<<endl;
+return;
+}
+
+
 /***ALPHABETA MINIMAX BELOW***/
 
 /***NEEDS FULL REFACTOR FOR THE PURPOSE OF ZERO PLAYER GAME***/
-int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int levelColor, bool maximizing)
+//for clarifications, refer to user doc.
+int board::ABMax(int alpha, int beta, int level, int depth, int levelColor)
 {
-	int k, m, tshoot, temp;
+int k, m, tshoot, temp;
 	/* Initial values of
 	 * Alpha and Beta
 	 * Terminating condition. i.e
@@ -17,18 +79,16 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 	int currentmove[4];
 	if (level == depth) {
 			tshoot = SEF(levelColor);
-			//cout << "\nSEF= " << tshoot << "\n";
+			//std::cout << "\nSEF= " << tshoot << "\n";
 			return tshoot;
 	}
-	else if (maximizing == true)
-	{/*PROBLEM!!!????*/
 		int val = MIN;
 
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 			{
-				if (board[i][j] > 0)
+				if (objBoard[i][j] > 0)
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
@@ -36,7 +96,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 							makeMove(currentmove, levelColor);
 							//calls for minimization using the opposing color
 							temp = val;
-							val = max(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, false));
+							val = std::max(val, ABMin(alpha, beta, level+1, depth, opColor));
 							unmakeMove(currentmove, levelColor, opColor);
 							/**AT ROOT OF RECURSIVE TREE, IS CURRENT MOVE BEST?**/
 							/**IF CURRENT MOVE BEST, CHANGE MOVE**/
@@ -46,7 +106,7 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 								bestmove[2] = currentmove[2];
 								bestmove[3] = currentmove[3];
 							}
-							alpha = max(alpha, val);
+							alpha = std::max(alpha, val);
 							//Alpha cutoff
 							if (beta <= alpha) {
 								return alpha;
@@ -58,43 +118,40 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 			}
 		}
 		/**Program can predict loss, and will end properly if loss.**/
-        if (level == 0 && val == MIN && levelColor == 1)
-		{
-			return GAME_OVER_WHITE;
-		}
-        if (level == 0 && val == MIN && levelColor == 2)
-		{
-			return GAME_OVER_BLACK;
-		}
 		if (val == MIN)
 		{
 			return LOSE;
 		}
 
     return val;
-	}
-	else
-	{
-		//cout << "minimizing \n";
-		int val = MAX;
+}
+
+int board::ABMin(int alpha, int beta, int level, int depth, int levelColor)
+{
+    int val = MAX;
+    int opColor = levelColor%2;
+    opColor++;
+    /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
+	int currentmove[4];
+
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 			{
-				if (board[i][j] > 0)
+				if (objBoard[i][j] > 0)
 				{
 					for (int Dir = 0; Dir < 4; Dir++) {
 						if (legal_move(currentmove, i, j, Dir)) {
-                            /*    cout << "\n ";
+                            /*    std::cout << "\n ";
 							for (int z = 0; z < 4; z++) {
-								cout << currentmove[z] + 1;
+								std::cout << currentmove[z] + 1;
 							}
-                            cout << "\n ";
+                            std::cout << "\n ";
                             */
 
 							makeMove(currentmove, levelColor);
-							val = min(val, alphaBetaMinimax(alpha, beta, level + 1, depth, opColor, true));
-							beta = min(beta, val);
+							val = std::min(val, ABMax(alpha, beta, level+1, depth, opColor));
+							beta = std::min(beta, val);
 							unmakeMove(currentmove, levelColor, opColor);
 							// Alpha Beta Pruning
 							if (beta <= alpha) {
@@ -108,18 +165,55 @@ int board::alphaBetaMinimax(int alpha, int beta, int level, int depth, int level
 		}
 		if (val == MAX)
 		{
-
-			/*ran out of moves on mimimzer
-			**The SEF needs tuning, but MAY work here
-			**(some assumptions have been made here)
-			**once tuned, it should perform ideally*/
 			return WIN;
 		}
 		return val;
-	}
-	cout << "ERROR";
-	return -1;
 }
+// returns best board, to be set as correct board.  Resource intensive.  Has to be a better way.
+board board::comparison (board board1, board board2, board board3, board board4, board board5, board board6, board board7, board board8)
+{
+    if (board1.bval<board2.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board2;
+    }
+    if (board1.bval<board3.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board3;
+    }
+    if (board1.bval<board4.bval)
+    {
+       cout<<board1.bval<<endl;
+        board1=board4;
+    }
+    if (board1.bval<board5.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board5;
+    }
+    if (board1.bval<board6.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board6;
+    }
+    if (board1.bval<board7.bval)
+    {   cout<<board1.bval<<endl;
+        board1=board7;
+    }
+    if (board1.bval<board8.bval)
+    {
+        cout<<board1.bval<<endl;
+        board1=board8;
+        cout<<board1.bval<<endl;
+    }
+
+    return board1;
+}
+
+
+/***NEEDS FULL REFACTOR FOR THE PURPOSE OF ZERO PLAYER GAME***/
+
 /**ZERO PLAYER GAME SELECTION**/
 bool board::setZpgame(){
     char ans;
@@ -137,40 +231,44 @@ bool board::setZpgame(){
 
 }
 /**SAFETY FOR USER ERRORS**/
-/*bool board::guardRails(){
+bool board::guardRails(){
     bool correct=false;
     int i,j,k,m;
     i=bestmove[0];
     j=bestmove[1];
     k=bestmove[2];
     m=bestmove[3];
+    //check for horizontal movement
     if(i==k||j==m){
-        i=(i-k)%2;
-        j=(j-m)%2;
-        i=i-j;
-        if (i==0)
+        //check for even number of squares traversed, if zero, then move is probably legal.
+        i=(abs(i-k))%2;
+        j=(abs(j-m))%2;
+
+        if (i==0&&j==0)
         {
             return true;
         }
-        cout<<"incorrect move";
-        return false;
+
     }
-}*/
+    std::cout<<"incorrect move";
+    return false;
+}
 /***ASSISTS MANUAL OVVERIDE***/
 void board::selection(int S) {
-	int i, j;
+	int startRow, startColumn;
 	cout << "\n column (A-H = 1-8): ";
-	cin >> j;
+	cin >> startColumn;
 	cout << "\n row (1-8): ";
-	cin >> i;
-	i--;
-	j--;
-	if (i > 7 || i < 0 || j>7 || j < 0) {
+	cin >> startRow;
+	//accommodate array indicies.
+	startRow--;
+	startColumn--;
+	if (startRow > 7 || startRow < 0 || startColumn>7 || startColumn < 0) {
 		cout << "\n invalid choice, restarting selection";
 	}
 
 	else {
-		board[i][j] = S;
+		objBoard[startRow][startColumn] = S;
 	}
 	return;
 }
@@ -181,7 +279,7 @@ void board::selection(int S) {
  /***ZERO PLAYER GAME COMPATIBLE***/
 void board::manualOverride() {
 	int p = 0;
-	int i, j;
+	int startRow, startColumn;
 	char remadd, ans;
 			while (ans != 'y') {
             display();
@@ -260,7 +358,7 @@ bool board::setColor() {
 /***       COLOR AGNOSTIC           ***/
 bool board::isFull(int i, int j) {
 
-	if (board[i][j] == 0){
+	if (objBoard[i][j] == 0){
 		return false;
 	}
 
@@ -269,17 +367,6 @@ bool board::isFull(int i, int j) {
 	}
 }
 
-
-/***ASSISTS WITH CALIBRATION OF SQUARES, DEALS WITH DOUBLE WHITE/BLACK BOARD EDGE ISSUE***/
-int board::calibrate(int i, int playerColor)
-{
-	if (playerColor == 2)
-	{ return i % 2; }
-	//starting index of an even i will be 0
-	else
-	//starting index of an even i will be 1
-	{ return (i + 1) % 2; }
-}
 
 
 /***FAIRLY SIMPLE DISPLAY FUNCTION***/
@@ -295,10 +382,10 @@ void board::display() {
 		for (int j = 0; j < 8; j++) {
 
 
-			if (board[i][j] > 1) {
+			if (objBoard[i][j] > 1) {
 				cout << "X ";
 			}
-			else if (board[i][j] > 0) {
+			else if (objBoard[i][j] > 0) {
 				cout << "O ";
 			}
 			else {
@@ -320,19 +407,27 @@ cout<<bestmove[3]+1<<", \n your move\n";
 *** Exists for the purposes of tallying possible ***
 *** moves, this is sufficient a refactor         ***
 *** may be desirable.  ZERO PLAYER GAME AGNOSTIC ***/
-bool board::legal_SEF(int i, int j, int Dir)
+bool board::legal_SEF(int startRow, int startColumn, int Dir)
 {
-	int k = i;
-	int m = j;
+    int N = 0;
+    int S = 1;
+    int W = 2;
+    int E = 3;
+
+	int destRow = startRow;
+
+	int destColumn = startColumn;
+
 	bool state;
-	if (Dir == 0) //N
+
+	if (Dir == N) //N
 	{
-		if (i > 1) {
-			k--;
-			state = isFull(k, m);
+		if (startRow > 1) {
+			destRow--;
+			state = isFull(destRow, destColumn);
 			if (state == true) {
-				k--;
-				state = isFull(k, m);
+				destRow--;
+				state = isFull(destRow, destColumn);
 				if (state == false) {
 					return true;
 				}
@@ -340,14 +435,14 @@ bool board::legal_SEF(int i, int j, int Dir)
 
 		}
 	}
-	if (Dir == 1) //S
-		if (i < 5) {
+	if (Dir == S)
+		if (startRow < 5) {
 			{
-				k++;
-				state = isFull(k, m);
+				destRow++;
+				state = isFull(destRow, destColumn);
 				if (state == true) {
-					k++;
-					state = isFull(k, m);
+					destRow++;
+					state = isFull(destRow, destColumn);
 					if (state == false) {
 						return true;
 					}
@@ -355,14 +450,14 @@ bool board::legal_SEF(int i, int j, int Dir)
 				}
 
 		}
-	if (Dir == 2)  //W
+	if (Dir == W)
 	{
-		if (j > 1) {
-			m--;
-			state = isFull(k, m);
+		if (startColumn > 1) {
+			destColumn--;
+			state = isFull(destRow, destColumn);
 			if (state == true) {
-				m--;
-				state = isFull(k, m);
+				destColumn--;
+				state = isFull(destRow, destColumn);
 				if (state == false) {
 					return true;
 				}
@@ -371,13 +466,13 @@ bool board::legal_SEF(int i, int j, int Dir)
 		}
 	}
 
-	if (Dir == 3) //E
+	if (Dir == E)
 	{
-		m++;
-		state = isFull(k, m);
+		destColumn++;
+		state = isFull(destRow, destColumn);
 		if (state == true) {
-			m++;
-			state = isFull(k, m);
+			destColumn++;
+			state = isFull(destRow, destColumn);
 			if (state == false) {
 				return true;
 			}
@@ -390,33 +485,33 @@ bool board::legal_SEF(int i, int j, int Dir)
 /***ACCOMODATING NEW COORDINATE SYSTEM ANNOUNCED      ***
  ***MESSY, REFACTOR IF TIME, IT IS COLOR AGNOSTIC     ***/
 
-bool board::legal_move(int currentmove[], int i, int j, int Dir)
+bool board::legal_move(int currentmove[], int startRow, int startColumn, int Dir)
 {
     bool state;
-    int k = i;
-	int m = j;
+    int destRow = startRow;
+	int destColumn = startColumn;
 	if (Dir == 0) //N
 	{
-		if (k > 1) {
-            k--;
-            state = isFull(k, m);
+		if (destRow > 1) {
+            destRow--;
+            state = isFull(destRow, destColumn);
             if (state == true) {
-				k--;
-				state = isFull(k, m);
+				destRow--;
+				state = isFull(destRow, destColumn);
 			if (state == false) {
-                currentmove[0] = i;
-                currentmove[1] = j;
-                currentmove[2] = k;
-                currentmove[3] = m;
-                    if(k>1){
-                        k--;
-                        state = isFull(k, m);
+                currentmove[0] = startRow;
+                currentmove[1] = startColumn;
+                currentmove[2] = destRow;
+                currentmove[3] = destColumn;
+                    if(destRow>1){
+                        destRow--;
+                        state = isFull(destRow, destColumn);
                         if (state == true) {
-                            k--;
-                            state = isFull(k, m);
+                            destRow--;
+                            state = isFull(destRow, destColumn);
                             if (state == false) {
-                                currentmove[2] = k;
-                                currentmove[3] = m;
+                                currentmove[2] = destRow;
+                                currentmove[3] = destColumn;
                             }
 
 					}
@@ -428,26 +523,26 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 	}
 	if (Dir == 1) //S
 	{
-        if (k < 6) {
-            k++;
-            state = isFull(k, m);
+        if (destRow < 6) {
+            destRow++;
+            state = isFull(destRow, destColumn);
             if (state == true) {
-				k++;
-				state = isFull(k, m);
+				destRow++;
+				state = isFull(destRow, destColumn);
 			if (state == false) {
-                currentmove[0] = i;
-                currentmove[1] = j;
-                currentmove[2] = k;
-                currentmove[3] = m;
-                    if(k<6){
-                        k++;
-                        state = isFull(k, m);
+                currentmove[0] = startRow;
+                currentmove[1] = startColumn;
+                currentmove[2] = destRow;
+                currentmove[3] = destColumn;
+                    if(destRow<6){
+                        destRow++;
+                        state = isFull(destRow, destColumn);
                         if (state == true) {
-                            k++;
-                            state = isFull(k, m);
+                            destRow++;
+                            state = isFull(destRow, destColumn);
                             if (state == false) {
-                                currentmove[2] = k;
-                                currentmove[3] = m;
+                                currentmove[2] = destRow;
+                                currentmove[3] = destColumn;
                             }
 
 					}
@@ -459,26 +554,26 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 	}
 	if (Dir == 2)  //W
 	{
-		if (m > 1) {
-            m--;
-            state = isFull(k, m);
+		if (destColumn > 1) {
+            destColumn--;
+            state = isFull(destRow, destColumn);
             if (state == true) {
-				m--;
-				state = isFull(k, m);
+				destColumn--;
+				state = isFull(destRow, destColumn);
 			if (state == false) {
-                currentmove[0] = i;
-                currentmove[1] = j;
-                currentmove[2] = k;
-                currentmove[3] = m;
-                    if(m>1){
-                        m--;
-                        state = isFull(k, m);
+                currentmove[0] = startRow;
+                currentmove[1] = startColumn;
+                currentmove[2] = destRow;
+                currentmove[3] = destColumn;
+                    if(destColumn>1){
+                        destColumn--;
+                        state = isFull(destRow, destColumn);
                         if (state == true) {
-                            m--;
-                            state = isFull(k, m);
+                            destColumn--;
+                            state = isFull(destRow, destColumn);
                             if (state == false) {
-                                currentmove[2] = k;
-                                currentmove[3] = m;
+                                currentmove[2] = destRow;
+                                currentmove[3] = destColumn;
                             }
 
 					}
@@ -491,26 +586,26 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 
 	if (Dir == 3) //E
 	{
-		if (m <6) {
-            m++;
-            state = isFull(k, m);
+		if (destColumn <6) {
+            destColumn++;
+            state = isFull(destRow, destColumn);
             if (state == true) {
-				m++;
-				state = isFull(k, m);
+				destColumn++;
+				state = isFull(destRow, destColumn);
 			if (state == false) {
-                currentmove[0] = i;
-                currentmove[1] = j;
-                currentmove[2] = k;
-                currentmove[3] = m;
-                    if(m<6){
-                        m++;
-                        state = isFull(k, m);
+                currentmove[0] = startRow;
+                currentmove[1] = startColumn;
+                currentmove[2] = destRow;
+                currentmove[3] = destColumn;
+                    if(destColumn<6){
+                        destColumn++;
+                        state = isFull(destRow, destColumn);
                         if (state == true) {
-                            m++;
-                            state = isFull(k, m);
+                            destColumn++;
+                            state = isFull(destRow, destColumn);
                             if (state == false) {
-                                currentmove[2] = k;
-                                currentmove[3] = m;
+                                currentmove[2] = destRow;
+                                currentmove[3] = destColumn;
                             }
 
 					}
@@ -531,42 +626,42 @@ bool board::legal_move(int currentmove[], int i, int j, int Dir)
 /** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME **/
 void board::makeMove(int currentmove[], int playerColor)
 {   //cout<<"making move\n";
-    int i,j,k,m;
+    int startRow,startColumn,destRow,destColumn;
     bool neq;
-	i = currentmove[0];
-	j = currentmove[1];
-	k = currentmove[2];
-	m = currentmove[3];
-	//cout<<" "<<i+1<<", "<<j+1<<", "<<k+1<<", "<<m+1<<"\n";
+	startRow = currentmove[0];
+	startColumn = currentmove[1];
+	destRow = currentmove[2];
+	destColumn = currentmove[3];
+	//cout<<" "<<startRow+1<<", "<<startColumn+1<<", "<<destRow+1<<", "<<destColumn+1<<"\n";
 	neq = true;
     do {
-    board[i][j] = 0;
+    objBoard[startRow][startColumn] = 0;
 
-    if (k < i)
+    if (destRow < startRow)
     {
-        board[i - 1][j] = 0;
-        board[i - 2][j] = playerColor;
-        i=i-2;
+        objBoard[startRow - 1][startColumn] = 0;
+        objBoard[startRow - 2][startColumn] = playerColor;
+        startRow=startRow-2;
     }
-    if (k > i)
+    if (destRow > startRow)
     {
-        board[i + 1][j] = 0;
-        board[i + 2][j] = playerColor;
-        i=i+2;
+        objBoard[startRow + 1][startColumn] = 0;
+        objBoard[startRow + 2][startColumn] = playerColor;
+        startRow=startRow+2;
     }
-    if (m < j)
+    if (destColumn < startColumn)
     {
-        board[i][j - 1] = 0;
-        board[i][j - 2] = playerColor;
-        j=j-2;
+        objBoard[startRow][startColumn - 1] = 0;
+        objBoard[startRow][startColumn - 2] = playerColor;
+        startColumn=startColumn-2;
     }
-    if (m > j)
+    if (destColumn > startColumn)
     {
-        board[i][j + 1] = 0;
-        board[i][j + 2] = playerColor;
-        j=j+2;
+        objBoard[startRow][startColumn + 1] = 0;
+        objBoard[startRow][startColumn + 2] = playerColor;
+        startColumn=startColumn+2;
     }
-    if((i==k)&&(m==j)){neq=false;}
+    if((startRow==destRow)&&(destColumn==startColumn)){neq=false;}
     } while (neq);
     return;
 }
@@ -574,52 +669,52 @@ void board::makeMove(int currentmove[], int playerColor)
 /**UNMAKE MOVE IS COLOR-AGNOSTIC, ZERO PLAYER GAME WILL NOT REQUIRE A CHANGE HERE**/
 
 void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
-    int i,j,k,m;
+    int startRow,startColumn,destRow,destColumn;
     bool neq=true;
-	i = currentmove[0];
-	j = currentmove[1];
-	k = currentmove[2];
-	m = currentmove[3];
+	startRow = currentmove[0];
+	startColumn = currentmove[1];
+	destRow = currentmove[2];
+	destColumn = currentmove[3];
 
 	while (neq){
         //cout << "\nunmaking move: ";
-		board[k][m] = 0;
-		if (k > i)
+		objBoard[destRow][destColumn] = 0;
+		if (destRow > startRow)
 		{
-			board[k - 1][m] = opColor;
-			board[k - 2][m] = playerColor;
-            k=k-2;
-            if(k==i)
+			objBoard[destRow - 1][destColumn] = opColor;
+			objBoard[destRow - 2][destColumn] = playerColor;
+            destRow=destRow-2;
+            if(destRow==startRow)
             {
                 break;
             }
 		}
-		if (k < i)
+		if (destRow < startRow)
 		{
-			board[k + 1][m] = opColor;
-			board[k + 2][m] = playerColor;
-			k=k+2;
-            if(k==i)
+			objBoard[destRow + 1][destColumn] = opColor;
+			objBoard[destRow + 2][destColumn] = playerColor;
+			destRow=destRow+2;
+            if(destRow==startRow)
             {
             break;
             }
 		}
-		if (m > j)
+		if (destColumn > startColumn)
 		{
-			board[k][m-1] = opColor;
-			board[k][m-2] = playerColor;
-			m=m-2;
-            if(m==j)
+			objBoard[destRow][destColumn-1] = opColor;
+			objBoard[destRow][destColumn-2] = playerColor;
+			destColumn=destColumn-2;
+            if(destColumn==startColumn)
             {
             break;
             }
 		}
-		if (m < j)
+		if (destColumn < startColumn)
 		{
-			board[k][m+1] = opColor;
-			board[k][m+2] = playerColor;
-			m=m+2;
-            if(m==j)
+			objBoard[destRow][destColumn+1] = opColor;
+			objBoard[destRow][destColumn+2] = playerColor;
+			destColumn=destColumn+2;
+            if(destColumn==startColumn)
             {
             break;
             }
@@ -661,7 +756,7 @@ int board::SEF(int playerColor) {
 	{
 		for (int j = calibrate(i, playerColor); j < 8; j = j + 2)
 		{
-			if (board[i][j] > 0)
+			if (objBoard[i][j] > 0)
 			{
 			    pb++;
 				for (int Dir = 0; Dir < 4; Dir++) {
@@ -678,7 +773,7 @@ int board::SEF(int playerColor) {
 	{
 		for (int j = calibrate(i, opColor); j < 8; j = j + 2)
 		{
-			if (board[i][j] > 0)
+			if (objBoard[i][j] > 0)
 			{
 			    oPiece++;
 				for (int Dir = 0; Dir < 4; Dir++) {

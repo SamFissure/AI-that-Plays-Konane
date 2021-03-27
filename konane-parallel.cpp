@@ -58,7 +58,7 @@
 
 /**color is AI, humanColor is opponent**/
 
-/***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
+/***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO BOARD?***/
 int AIcolor, humanColor;
 
 #include "board.cpp"
@@ -87,11 +87,9 @@ void player::wargamesReference()
 
 void write_csv(double input[], int totalMoves){
 
-    // Make a CSV file with one or more columns of integer values
+    // Make a CSV file with move record for stat tracking
     // Each column of data is represented by the pair <column name, column data>
-    // The dataset is represented as a vector of these columns
 
-    // Create an output filestream object
     std::ofstream csv("parallel-moves-14-1.csv");
     csv<<"Turn, Time \n";
     for(int i=0;i<totalMoves;i++){
@@ -116,11 +114,10 @@ int main() {
 	//for recording time
     double csv[50];
     duration<double> timeCount;
-    char correct, ans;
-    //who is first, whose turn is it?
-	bool first, AIturn, right;
-	//
-	bool cor=true;
+
+    //who is first, whose turn is it, is it zero player,is the human player making a legal move?
+	bool first, AIturn, ZeroPlay, legalHumMove;
+	//objjects
 	player player;
 	board board, board1, board2, board3, board4, board5, board6, board7, board8;
 	/**odd numbered depths end on min nodes, even on max. This doesn't work. This is to check for that**/
@@ -129,7 +126,7 @@ int main() {
 
 	player.wargamesReference();
 	//Zero Player Game?
-	right=board.setZpgame();
+	ZeroPlay=board.setZpgame();
 	if (right){
         board.zpgame=true;
 	}
@@ -230,7 +227,7 @@ int main() {
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             //same as above
-            if((right) && (AIturn==false)){
+            if((ZeroPlay) && (AIturn==false)){
 
                 high_resolution_clock::time_point tpre = high_resolution_clock::now();
                 board1=board;
@@ -280,7 +277,7 @@ int main() {
                 csv[turn-1]=tc;
                 }
             /** if PLAYING A HUMAN**/
-		if((!right) && (AIturn==false)) {
+		if((!ZeroPlay) && (AIturn==false)) {
             do{
                 std::cout << "\nenter piece to move column, 1-8: ";
                 //source column
@@ -304,10 +301,10 @@ int main() {
                 k--;
                 //destination row
                 board.bestmove[2]=k;
-
-            }while(! cor);
+                legalHumMove=board.guardRails();
+            }while(! legalHumMove);
             //is this move legal?
-            cor=board.guardRails();
+
 
 			board.makeMove(board.bestmove,humanColor);
 			board.displayMove();

@@ -31,69 +31,63 @@
 		 *
 		 * 7. The SEF evaluates partly by counting legal moves for player in that state.
 		 * Additionally, it counts pieces and estimates based on expected piece balance (each move must remove one piece, if more pieces are missing a
-		 * double move has occurred.  The SEF assumes that this is always bad for the player who had this happen.)
+		 * double move has occurred.  The SEF assumes that this is bad for the player who had this happen to it.)
 		 *
 		 * The SEF value is passed up to the top of the tree with varied modifications, minimizing levels take the lowest value to pass, maximizing
 		 * will take up the largest values
 		 *
-		 * Dir can = 0 for N, 1 for E, 2 for S, 3 for W
+		 * Dir can = 0 for N (up), 1 for E(right), 2 for S (down), 3 for W (left)
 		 */
 
 
 
-/* STANDARD AND CUSTOM INCLUDES FROM LIBRARY FILES AND NAMESPACE */
+/* STANDARD INCLUDES FROM LIBRARY FILES AND NAMESPACE */
 #include "myincludes.h"
-/*Include Constants*/
+
+/*Include Constants, depth is defined at compile time, as are some*/
 #include "const.h"
-using namespace std;
+
+
 /**REMEMBER TO USE THE DIAGNOSTIC PRINTOUTS FOR FUTURE CHANGES**/
-/*dynamic globals, may alter as needed*/
 
-/*AI TURN?*/
-/**FUNCTIONAL WITH 14 DEPTH, EASE OF TESTING AT 12 OR 10 DEPTH, GAMEPLAY IS DIFFERENT DEPENDING ON DEPTH**/
-int turn;
 
-//color is AI, humanColor is opponent
-/***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO MAIN?***/
+/**FUNCTIONAL WITH 16 DEPTH, EASE OF TESTING AT 14 OR 12 DEPTH, GAMEPLAY IS DIFFERENT DEPENDING ON DEPTH**/
+
+/**color is AI, humanColor is opponent**/
+
+/***MUST HAVE THESE GLOBALS, COULD PERHAPS EDIT INTO BOARD?***/
 int AIcolor, humanColor;
-/******************DUE TO FOLLOWING OFFICIAL RULES, COLOR HAS BEEN MERGED WITH FIRST**********************/
 
 #include "board.cpp"
-
+/******************DUE TO FOLLOWING OFFICIAL RULES, COLOR HAS BEEN MERGED WITH FIRST**********************/
+/***(setters and getters, removed from code at this time)***/
+/*int getFirst(){return first;}
+ *int getColor() {return AIcolor;}
+ *int getPlayerColor() {return playerColor;}
+ */
 class player{
 public:
-    void jokes();
-    void detectWL(int value);
+    void wargamesReference();
 };
 
-void player::jokes()
+void player::wargamesReference()
 {
     int jokes;
-    cout << "Would you like to play a game? \n";
-	cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War\n";
-	cin >> jokes;
+    std::cout << "Would you like to play a game? \n";
+	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War (Obligatory Wargames Reference)\n";
+	std::cin >> jokes;
 	if (jokes == 3) {
-		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
+		std::cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
 }
-
-void player::detectWL(int value){}
-
-
-
-
 
 
 void write_csv(double input[], int totalMoves){
 
-    // Make a CSV file with one or more columns of integer values
+    // Make a CSV file with move record for stat tracking
     // Each column of data is represented by the pair <column name, column data>
-    //   as std::pair<std::string, std::vector<int>>
-    // The dataset is represented as a vector of these columns
-    // Note that all columns should be the same size
 
-    // Create an output filestream object
-    std::ofstream csv("normal-moves-14-1.csv");
+    std::ofstream csv("parallel-moves-14-1.csv");
     csv<<"Turn, Time \n";
     for(int i=0;i<totalMoves;i++){
         csv<<i+1<<","<<input[i]<<"\n";
@@ -103,7 +97,6 @@ void write_csv(double input[], int totalMoves){
     // Close the file
     csv.close();
 }
-
 
 /*SHOULD CONSIDER MAKING MORE FUNCTIONS OUT OF THINGS IN MAIN!!*/
 int main() {

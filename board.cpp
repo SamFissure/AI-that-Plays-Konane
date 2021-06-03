@@ -7,19 +7,18 @@ int board::calibrate(int i, int playerColor)
 	if (playerColor == 2)
         {return i % 2;}
 	//starting index of an even i will be 0
-	else
 	//starting index of an even i will be 1
-        {return (i + 1) % 2;}
+    return (i + 1) % 2;
 }
 
 void board::threadKonane(int i,int alpha, int beta, int depth, int levelColor){
-int k, m, temp;
    int opColor = levelColor%2;
     opColor++;
     /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
 	int currentmove[4];
 	int val = MIN;
-    bval= MIN;
+    int temp = MIN;
+	bval = MIN;
 for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 	{
 		if (objBoard[i][j] > 0)
@@ -29,7 +28,6 @@ for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 					/*****MOVE PIECE*****/
 					makeMove(currentmove, levelColor);
 					//calls for minimization using the opposing color
-					temp = val;
 					//needs some work.
 
 					//calling serial variation
@@ -68,7 +66,7 @@ return;
 //for clarifications, refer to user doc.
 int board::ABMax(int alpha, int beta, int level, int depth, int levelColor)
 {
-int k, m, tshoot, temp;
+int tshoot, temp;
 	/* Initial values of
 	 * Alpha and Beta
 	 * Terminating condition. i.e
@@ -722,28 +720,9 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 }
 }
 
-/**DEBRIS COMMENTS, NEED TO RECONCILE WITH CURRENT VERSION**/
-	/*AI Game Playing Functions, in a loop every turn
-	void ABmax();		//maximizer for AI sim, may want it to be separate from this class?
-	void ABmin();       //minimizer for AI sim, may want it to be separate from this class?
-	Make a move in-game
-	void chosenMove();  //states move chosen, implements... probably unneccessary*/
-
-	/*
-The minimax algorithm begins at the current state of the game recursively searching the
-game tree for the optimal move depth-first, which means exploring a branch as far as it goes and
-then backtracking until a path that has not been explored is found. Once the algorithm reaches a
-leaf node, which indicates a terminal state, or reaches the specified search depth in the game tree
-the utility(best/worst) value of the node is returned.
-*/
-
-
-
-/**TO ACHIEVE ZERO PLAYER GAME, THE SEF NEEDS EDITS**/
 
 int board::SEF(int playerColor) {
 	int sum=0;    //sum of total moves for SEF player
-	int eb=0;     //deprecated but potentially useful
 	int pb=0;     //Player pieces
 	int oPiece=0; //Opponent pieces
 	//pb=30;

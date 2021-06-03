@@ -117,7 +117,7 @@ int main() {
 
     //who is first, whose turn is it, is it zero player,is the human player making a legal move?
 	bool first, AIturn, ZeroPlay, legalHumMove;
-	//objjects
+	//objects
 	player player;
 	board board, board1, board2, board3, board4, board5, board6, board7, board8;
 	/**odd numbered depths end on min nodes, even on max. This doesn't work. This is to check for that**/
@@ -140,15 +140,6 @@ int main() {
 	}
 	/**SETS BOARD UP**/
     board.manualOverride();
-    /**SETS UP BOARDS FOR THREADS**/
-    board1=board;
-    board2=board;
-    board3=board;
-    board4=board;
-    board5=board;
-    board6=board;
-    board7=board;
-    board8=board;
     //Starts the clock.
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	while (true) {

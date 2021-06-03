@@ -86,7 +86,6 @@ class board {
 
 	//RECORDS MOVES BESTMOVE HOLDS FIRST MOVE AND THEN ANY MOVE THAT IS BETTER.
 	int bestmove[4];
-	int playermove[4];
 
 };
 

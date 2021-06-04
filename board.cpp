@@ -219,12 +219,12 @@ bool board::setZpgame(){
         cout<<"Will I be playing Myself? \ny/n\n";
         cin>>ans;
         if (ans=='y'){
-        return true;
+      		return true;
         }
-    else if(ans == 'n'){
-        return false;
+	   if(ans == 'n'){
+        	return false;
         }
-        else{}
+
     }while (true);
 
 }

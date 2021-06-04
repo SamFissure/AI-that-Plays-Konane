@@ -106,7 +106,6 @@ void write_csv(double input[], int totalMoves){
 /**TODO:: TOO MUCH IN MAIN!! REFACTOR!!**/
 
 int main() {
-	int Dir = 0;
 	int level=0;
 	int turn=0;
 	int i,j,k,m,z, alpha, beta, state;

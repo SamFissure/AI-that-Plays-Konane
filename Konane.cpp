@@ -65,21 +65,7 @@ int AIcolor, humanColor;
  *int getColor() {return AIcolor;}
  *int getPlayerColor() {return playerColor;}
  */
-class player{
-public:
-    void wargamesReference();
-};
 
-void player::wargamesReference()
-{
-    int jokes;
-    std::cout << "Would you like to play a game? \n";
-	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War (Obligatory Wargames Reference)\n";
-	std::cin >> jokes;
-	if (jokes == 3) {
-		std::cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
-	}
-}
 
 
 void write_csv(double input[], int totalMoves){
@@ -101,7 +87,6 @@ void write_csv(double input[], int totalMoves){
 /*SHOULD CONSIDER MAKING MORE FUNCTIONS OUT OF THINGS IN MAIN!!*/
 int main() {
 
-	int Dir = 0;
 	int level=0;
 	int turn=0;
 	int i,j,k,m,z, alpha, beta, state;
@@ -118,7 +103,6 @@ int main() {
 	cout<<"\n";
 
 
-	player.jokes();
 	right=board.setZpgame();
 	if (right){
         board.zpgame=true;

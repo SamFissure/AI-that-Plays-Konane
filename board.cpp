@@ -31,7 +31,7 @@ for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 					//needs some work.
 
 					//calling serial variation
-					val = max(val, ABMin(alpha, beta, 1, depth, opColor));
+					val = std::max(val, ABMin(alpha, beta, 1, depth, opColor));
 
 
 					unmakeMove(currentmove, levelColor, opColor);
@@ -42,7 +42,7 @@ for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
                     //This IS "depth zero" as far as the code
                     //is concerned, hence this can happen here.
                     //could remove from other code.
-					alpha = max(alpha, val);
+					alpha = std::max(alpha, val);
                         if (temp < val) {
                             bval=val;
                             //the best move is the highest scoring move selected
@@ -55,7 +55,7 @@ for (int j = calibrate(i, levelColor); j < 8; j = j + 2)
 			}
 		}
 	}
-	//cout<<"SEF of thread "<<i<<" = "<<bval<<endl;
+	//cout << "SEF of thread "<<i<<" = "<<bval<<"\n";
 return;
 }
 
@@ -172,38 +172,38 @@ board board::comparison (board board1, board board2, board board3, board board4,
 {
     if (board1.bval<board2.bval)
     {
-        cout<<board1.bval<<endl;
+        cout << board1.bval<<"\n";
         board1=board2;
     }
     if (board1.bval<board3.bval)
     {
-        cout<<board1.bval<<endl;
+        cout << board1.bval<<"\n";
         board1=board3;
     }
     if (board1.bval<board4.bval)
     {
-       cout<<board1.bval<<endl;
+       cout << board1.bval<<"\n";
         board1=board4;
     }
     if (board1.bval<board5.bval)
     {
-        cout<<board1.bval<<endl;
+        cout << board1.bval<<"\n";
         board1=board5;
     }
     if (board1.bval<board6.bval)
     {
-        cout<<board1.bval<<endl;
+        cout << board1.bval<<"\n";
         board1=board6;
     }
     if (board1.bval<board7.bval)
-    {   cout<<board1.bval<<endl;
+    {   cout << board1.bval<<"\n";
         board1=board7;
     }
     if (board1.bval<board8.bval)
     {
-        cout<<board1.bval<<endl;
+        cout << board1.bval<<"\n";
         board1=board8;
-        cout<<board1.bval<<endl;
+        cout << board1.bval<<"\n";
     }
 
     return board1;
@@ -216,8 +216,8 @@ board board::comparison (board board1, board board2, board board3, board board4,
 bool board::setZpgame(){
     char ans;
     do{
-        cout<<"Will I be playing Myself? \ny/n\n";
-        cin>>ans;
+        cout << "Will I be playing Myself? \ny/n\n";
+        cin >>ans;
         if (ans=='y'){
       		return true;
         }
@@ -230,7 +230,6 @@ bool board::setZpgame(){
 }
 /**SAFETY FOR USER ERRORS**/
 bool board::guardRails(){
-    bool correct=false;
     int i,j,k,m;
     i=bestmove[0];
     j=bestmove[1];
@@ -248,7 +247,7 @@ bool board::guardRails(){
         }
 
     }
-    std::cout<<"incorrect move";
+    cout << "incorrect move";
     return false;
 }
 /***ASSISTS MANUAL OVVERIDE***/
@@ -276,13 +275,11 @@ void board::selection(int S) {
  ***ASSUMES SOME INTELLIGENCE ON PART OF USER***/
  /***ZERO PLAYER GAME COMPATIBLE***/
 void board::manualOverride() {
-	int p = 0;
-	int startRow, startColumn;
 	char remadd, ans;
 			while (ans != 'y') {
             display();
 
-	cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
+	cout <<  "\n\nX= Black, O = White, Spaces for empty squares\n\n";
 	cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
 	cin >> remadd;
 		while (remadd != 'e') {
@@ -304,7 +301,7 @@ void board::manualOverride() {
 			else{
 				cout <<"\n invalid choice, restarting selection\n";
                 display();
-                cout<< "\n\nX= Black, O = White, Spaces for empty squares\n\n";
+                cout <<  "\n\nX= Black, O = White, Spaces for empty squares\n\n";
                 cout << "r = Removal of piece, b = add black, w = add white e = exit \n";
                 cin >> remadd;
 			}
@@ -334,13 +331,13 @@ bool board::setColor() {
         {
             humanColor = 1;
             first = true;
-        cout<< "\nI play as black and go first.";
+        cout <<  "\nI play as black and go first.";
         }
         else if (AIcolor == 1)
         {
             humanColor = 2;
             first = false;
-            cout<< "\nI play as white and go second.";
+            cout <<  "\nI play as white and go second.";
         }
         else {
             cout << "\nerror, restarting";
@@ -359,10 +356,7 @@ bool board::isFull(int i, int j) {
 	if (objBoard[i][j] == 0){
 		return false;
 	}
-
-	else {
-		return true;
-	}
+	return true;
 }
 
 
@@ -373,7 +367,7 @@ void board::display() {
 	cout << "   A B C D E F G H \n";
     cout << "   1 2 3 4 5 6 7 8 ";
 
-	cout<< "\n \n";
+	cout <<  "\n \n";
 	for (int i = 0; i < 8; i++) {
         cout << ++row <<"  ";
 
@@ -394,10 +388,10 @@ void board::display() {
 	}
 }
 void board::displayMove(){
-cout<<"\n"<<bestmove[0]+1<<", ";
-cout<<bestmove[1]+1<<", to ";
-cout<<bestmove[2]+1<<", ";
-cout<<bestmove[3]+1<<", \n your move\n";
+cout << "\n"<<bestmove[0]+1<<", ";
+cout << bestmove[1]+1<<", to ";
+cout << bestmove[2]+1<<", ";
+cout << bestmove[3]+1<<", \n your move\n";
 }
 /***       TESTS LEGALITY OF MOVE FOR SEF        ***/
 
@@ -623,14 +617,14 @@ bool board::legal_move(int currentmove[], int startRow, int startColumn, int Dir
 
 /** DOES NOT NEED REFACTORING FOR ZERO PLAYER GAME **/
 void board::makeMove(int currentmove[], int playerColor)
-{   //cout<<"making move\n";
+{   //cout << "making move\n";
     int startRow,startColumn,destRow,destColumn;
     bool neq;
 	startRow = currentmove[0];
 	startColumn = currentmove[1];
 	destRow = currentmove[2];
 	destColumn = currentmove[3];
-	//cout<<" "<<startRow+1<<", "<<startColumn+1<<", "<<destRow+1<<", "<<destColumn+1<<"\n";
+	//cout << " "<<startRow+1<<", "<<startColumn+1<<", "<<destRow+1<<", "<<destColumn+1<<"\n";
 	neq = true;
     do {
     objBoard[startRow][startColumn] = 0;
@@ -765,7 +759,7 @@ int board::SEF(int playerColor) {
 
 		}
 	}
-   //cout<<"SEF EXECUTED ON BELOW BOARD\n";
+   //cout << "SEF EXECUTED ON BELOW BOARD\n";
    //display();
     return (sum+(pb-oPiece));
 }

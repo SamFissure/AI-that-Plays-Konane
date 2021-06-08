@@ -19,11 +19,10 @@ This can happen in future iterations of the program
 #include <ratio>
 
 
-using namespace std;
 using std::chrono::duration;
 using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::milli;
-
-
+using std::cin;
+using std::cout;
 #endif // myincludes_h

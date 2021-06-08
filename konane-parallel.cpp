@@ -76,11 +76,11 @@ public:
 void player::wargamesReference()
 {
     int jokes;
-    std::cout << "Would you like to play a game? \n";
-	std::cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War (Obligatory Wargames Reference)\n";
-	std::cin >> jokes;
+    cout << "Would you like to play a game? \n";
+	cout << "1. Konane \n2. ALSO Konane\n3. Global Thermonuclear War (Obligatory Wargames Reference)\n";
+	cin >> jokes;
 	if (jokes == 3) {
-		std::cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
+		cout << "That game is SOOOOOOOO boring,let's play Konane!!!\n";
 	}
 }
 
@@ -120,15 +120,19 @@ int main() {
 	player player;
 	board board, board1, board2, board3, board4, board5, board6, board7, board8;
 	/**odd numbered depths end on min nodes, even on max. This doesn't work. This is to check for that**/
-	std::cout<<"depth = "<< depth<<". (This should be an even number)\n";
-	std::cout<<"\n";
+	cout << "depth = "<< depth<<". (This should be an even number)\n";
+	cout << "\n";
+
 
 	player.wargamesReference();
 	//Zero Player Game?
 	ZeroPlay=board.setZpgame();
-	if (right){
+	if (ZeroPlay){
         board.zpgame=true;
 	}
+    else{
+        board.zpgame=false;
+    }
 	//Who is black, goes first?
 	first=board.setColor();
 	if (first == true) {
@@ -145,7 +149,7 @@ int main() {
             //if all moves lose.
 
         if(board.bval<-500){
-            std::cout<<"Game over, White loses";
+            cout << "Game over, White loses";
             break;
                 }
 		if (AIturn) {
@@ -167,14 +171,14 @@ int main() {
             //Initiates threads, calls them on the rows of the board
             //Alpha and Beta NOT set to Min and Max at first call.  This has improved efficiency and reduced error.
             //They ARE set to MAX and MIN later.
-			thread th1( &board::threadKonane, &board1, 0, 1,2,depth,AIcolor);
-			thread th2( &board::threadKonane, &board2, 1, 1,2,depth,AIcolor);
-			thread th3( &board::threadKonane, &board3, 2, 1,2,depth,AIcolor);
-			thread th4( &board::threadKonane, &board4, 3, 1,2,depth,AIcolor);
-			thread th5( &board::threadKonane, &board5, 4, 1,2,depth,AIcolor);
-			thread th6( &board::threadKonane, &board6, 5, 1,2,depth,AIcolor);
-			thread th7( &board::threadKonane, &board7, 6, 1,2,depth,AIcolor);
-			thread th8( &board::threadKonane, &board8, 7, 1,2,depth,AIcolor);
+			std::thread th1( &board::threadKonane, &board1, 0, 1,2,depth,AIcolor);
+			std::thread th2( &board::threadKonane, &board2, 1, 1,2,depth,AIcolor);
+			std::thread th3( &board::threadKonane, &board3, 2, 1,2,depth,AIcolor);
+			std::thread th4( &board::threadKonane, &board4, 3, 1,2,depth,AIcolor);
+			std::thread th5( &board::threadKonane, &board5, 4, 1,2,depth,AIcolor);
+			std::thread th6( &board::threadKonane, &board6, 5, 1,2,depth,AIcolor);
+			std::thread th7( &board::threadKonane, &board7, 6, 1,2,depth,AIcolor);
+			std::thread th8( &board::threadKonane, &board8, 7, 1,2,depth,AIcolor);
 
 			//Joins threads to main program after program run (some efficiencies to realize here).
 			th1.join();
@@ -191,7 +195,7 @@ int main() {
 			board.display();
 			//if no valid moves
             if(board.bval<-500){
-                cout<<"Game Over, Black Loses";
+                cout << "Game Over, Black Loses";
                 break;
                 }
 
@@ -211,7 +215,7 @@ int main() {
 			timeCount = duration_cast<duration<double>>(tpost-tpre);
             tc=timeCount.count();
             //gives amount of time taken
-            std::cout<<"\n"<<tc<<"\n";
+            cout << "\n"<<tc<<"\n";
             //records time and turn to array
             csv[turn-1]=tc;
             }
@@ -228,14 +232,14 @@ int main() {
                 board6=board;
                 board7=board;
                 board8=board;
-                thread th1( &board::threadKonane, &board1, 0, 1,2,depth,humanColor);
-                thread th2( &board::threadKonane, &board2, 1, 1,2,depth,humanColor);
-                thread th3( &board::threadKonane, &board3, 2, 1,2,depth,humanColor);
-                thread th4( &board::threadKonane, &board4, 3, 1,2,depth,humanColor);
-                thread th5( &board::threadKonane, &board5, 4, 1,2,depth,humanColor);
-                thread th6( &board::threadKonane, &board6, 5, 1,2,depth,humanColor);
-                thread th7( &board::threadKonane, &board7, 6, 1,2,depth,humanColor);
-                thread th8( &board::threadKonane, &board8, 7, 1,2,depth,humanColor);
+                std::thread th1( &board::threadKonane, &board1, 0, 1,2,depth,humanColor);
+                std::thread th2( &board::threadKonane, &board2, 1, 1,2,depth,humanColor);
+                std::thread th3( &board::threadKonane, &board3, 2, 1,2,depth,humanColor);
+                std::thread th4( &board::threadKonane, &board4, 3, 1,2,depth,humanColor);
+                std::thread th5( &board::threadKonane, &board5, 4, 1,2,depth,humanColor);
+                std::thread th6( &board::threadKonane, &board6, 5, 1,2,depth,humanColor);
+                std::thread th7( &board::threadKonane, &board7, 6, 1,2,depth,humanColor);
+                std::thread th8( &board::threadKonane, &board8, 7, 1,2,depth,humanColor);
                 th1.join();
                 th2.join();
                 th3.join();
@@ -248,7 +252,7 @@ int main() {
                 board.display();
                 //if no valid moves
                 if(board.bval<-500){
-                std::cout<<"Game over, White loses";
+                cout << "Game over, White loses";
                 break;
                 }
                 board.makeMove(board.bestmove, humanColor);
@@ -263,31 +267,31 @@ int main() {
                 high_resolution_clock::time_point tpost = high_resolution_clock::now();
                 timeCount = duration_cast<duration<double>>(tpost-tpre);
                 tc=timeCount.count();
-                std::cout<<"\n"<<tc<<"\n";
+                cout << "\n"<<tc<<"\n";
                 csv[turn-1]=tc;
                 }
             /** if PLAYING A HUMAN**/
 		if((!ZeroPlay) && (AIturn==false)) {
             do{
-                std::cout << "\nenter piece to move column, 1-8: ";
+                cout << "\nenter piece to move column, 1-8: ";
                 //source column
-                std::cin >> j;
+                cin >> j;
                 //accomodate indexing
                 j--;
                 //enters player move into array
                 board.bestmove[1]=j;
-                std::cout << "\nenter piece to move row, 1-8: ";
-                std::cin >> i;
+                cout << "\nenter piece to move row, 1-8: ";
+                cin >> i;
                 i--;
                 //source row
                 board.bestmove[0]=i;
-                std::cout << "\nenter piece destination column, 1-8: ";
-                std::cin >> m;
+                cout << "\nenter piece destination column, 1-8: ";
+                cin >> m;
                 m--;
                 //destination column
                 board.bestmove[3]=m;
-                std::cout << "\nenter piece destination row, 1-8: ";
-                std::cin >> k;
+                cout << "\nenter piece destination row, 1-8: ";
+                cin >> k;
                 k--;
                 //destination row
                 board.bestmove[2]=k;
@@ -302,14 +306,14 @@ int main() {
 			turn++;
 			AIturn=true;
 			}
-        std::cout<<  "\nassuming correct board and continue\n";
+        cout <<   "\nassuming correct board and continue\n";
 	}
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	 duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	std::cout<<"finished in "<<turn<<" turns";
-    std::cout << "It took me " << time_span.count() << " seconds.\n";
+	cout << "finished in "<<turn<<" turns";
+    cout << "It took me " << time_span.count() << " seconds.\n";
     for(z=0;z<turn;z++)
-        {std::cout<<"turn " <<z+1<< " took "<<csv[z]<<" seconds \n";}
+        {cout << "turn " <<z+1<< " took "<<csv[z]<<" seconds \n";}
     //write_csv(csv, turn);
 	return 0;
 }

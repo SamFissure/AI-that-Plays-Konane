@@ -96,11 +96,10 @@ int main() {
     char correct, ans;
 	bool first, AIturn, right;
 	bool cor=true;
-	player player;
 	board board;
 	/**odd numbered depths are on min nodes, even on max. This doesn't work.**/
-	cout<<"depth = "<< depth<<". (This should be an even number)\n";
-	cout<<"\n";
+	cout << "depth = "<< depth<<". (This should be an even number)\n";
+	cout << "\n";
 
 
 	right=board.setZpgame();
@@ -119,7 +118,7 @@ int main() {
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	while (true) {
 
-        //cout<<"\nSEF = " <<state <<"\n";
+        //cout << "\nSEF = " <<state <<"\n";
 		if (AIturn) {
                 high_resolution_clock::time_point tpre = high_resolution_clock::now();
                 //ERROR ON FIRST AND SECOND PARAMETERS?
@@ -149,9 +148,9 @@ int main() {
             high_resolution_clock::time_point tpost = high_resolution_clock::now();
 			timeCount = duration_cast<duration<double>>(tpost-tpre);
             tc=timeCount.count();
-            std::cout<<"\n"<<tc<<"\n";
+            cout << "\n"<<tc<<"\n";
             csv[turn-1]=tc;
-			//cout<<"\nSEF = " <<state <<"\n";
+			//cout << "\nSEF = " <<state <<"\n";
             }
             /** if PLAYING AGAINST ITSELF OR A SIMILAR AI W A DIFFERENT SEF**/
             else if((right) && (AIturn==false)){
@@ -180,7 +179,7 @@ int main() {
             high_resolution_clock::time_point tpost = high_resolution_clock::now();
             timeCount = duration_cast<duration<double>>(tpost-tpre);
             tc=timeCount.count();
-            std::cout<<"\n"<<tc<<"\n";
+            cout << "\n"<<tc<<"\n";
             csv[turn-1]=tc;
             }
             /** if PLAYING A HUMAN**/
@@ -215,24 +214,24 @@ int main() {
 			}
 			        if(state==GAME_OVER_BLACK)
             {
-            cout<<"Black Loses\n";
+            cout << "Black Loses\n";
             break;
             }
         if(state==GAME_OVER_WHITE)
             {
-            cout<<"White Loses\n";
+            cout << "White Loses\n";
             break;
             }
-        cout<<  "\nassuming correct board and continue\n";
+        cout <<   "\nassuming correct board and continue\n";
         //cout << "\n is board correct? y for yes, n for no \n \n";
         //cin >> ans;
 	}
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	 duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	std::cout<<"\nfinished in "<<turn<<" turns";
-    std::cout << "\nIt took me " << time_span.count() << " seconds.\n";
+	cout << "\nfinished in "<<turn<<" turns";
+    cout << "\nIt took me " << time_span.count() << " seconds.\n";
     for(z=0;z<turn;z++)
-    {std::cout<<"turn " <<z+1<< " took "<<csv[z]<<" seconds \n";}
+    {cout << "turn " <<z+1<< " took "<<csv[z]<<" seconds \n";}
     write_csv(csv, turn);
 	return 0;
 }

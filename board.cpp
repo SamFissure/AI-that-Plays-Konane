@@ -66,7 +66,7 @@ return;
 //for clarifications, refer to user doc.
 int board::ABMax(int alpha, int beta, int level, int depth, int levelColor)
 {
-int tshoot, temp;
+int sefVal, temp;
 	/* Initial values of
 	 * Alpha and Beta
 	 * Terminating condition. i.e
@@ -76,9 +76,9 @@ int tshoot, temp;
     /**RESOLVE MATH AFTER SUCCESSFUL TEST**/
 	int currentmove[4];
 	if (level == depth) {
-			tshoot = SEF(levelColor);
+			sefVal = SEF(levelColor);
 			//std::cout << "\nSEF= " << tshoot << "\n";
-			return tshoot;
+			return sefVal;
 	}
 		int val = MIN;
 
@@ -237,7 +237,8 @@ bool board::guardRails(){
     m=bestmove[3];
     //check for horizontal movement
     if(i==k||j==m){
-        //check for even number of squares traversed, if zero, then move is probably legal.
+		//check for even number of squares traversed, if mod 2 = zero, then move is probably legal, 
+	    //player can still break game w illegal move, but player can flip the board in monopoly as well soooo....
         i=(abs(i-k))%2;
         j=(abs(j-m))%2;
 
@@ -412,7 +413,7 @@ bool board::legal_SEF(int startRow, int startColumn, int Dir)
 
 	bool state;
 
-	if (Dir == N) //N
+	if (Dir == N)
 	{
 		if (startRow > 1) {
 			destRow--;
@@ -428,8 +429,8 @@ bool board::legal_SEF(int startRow, int startColumn, int Dir)
 		}
 	}
 	if (Dir == S)
+	{
 		if (startRow < 5) {
-			{
 				destRow++;
 				state = isFull(destRow, destColumn);
 				if (state == true) {
@@ -716,25 +717,23 @@ void board::unmakeMove(int currentmove[],int playerColor, int opColor) {
 
 
 int board::SEF(int playerColor) {
-	int sum=0;    //sum of total moves for SEF player
-	int pb=0;     //Player pieces
-	int oPiece=0; //Opponent pieces
-	//pb=30;
-	//eb=(pb-(turn+pass));
-	//ABOVE NEEDS SOME WORK
+	int sumMoves=0;    //sum of total moves for SEF player
+	int pb=0;     //Player pieces versus opponent pieces, ("piece balance")
+
 	int opColor = playerColor%2;
 	opColor++;
-	/**PIECE BALANCE ADJUSTMENT MAy BE NEEDED BASED ON WHO IS FIRST IF PLAYER IS SECOND, INCREMENT PIECES**/
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = calibrate(i, playerColor); j < 8; j = j + 2)
 		{
 			if (objBoard[i][j] > 0)
 			{
+				//pieces AI
 			    pb++;
 				for (int Dir = 0; Dir < 4; Dir++) {
 					if (legal_SEF(i, j, Dir)) {
-						sum++;
+						//possible moves AI
+						sumMoves++;
 					}
 				}
 
@@ -748,10 +747,12 @@ int board::SEF(int playerColor) {
 		{
 			if (objBoard[i][j] > 0)
 			{
-			    oPiece++;
+				//pieces player
+			    pb--;
 				for (int Dir = 0; Dir < 4; Dir++) {
 					if (legal_SEF(i, j, Dir)) {
-						sum--;
+						//AI moves minus possible moves player
+						sumMoves--;
 					}
 				}
 
@@ -759,7 +760,6 @@ int board::SEF(int playerColor) {
 
 		}
 	}
-   //cout << "SEF EXECUTED ON BELOW BOARD\n";
-   //display();
-    return (sum+(pb-oPiece));
+	
+    return (sumMoves+pb); //all the moves possible for AI less the total moves possible by the player and the piece balance
 }

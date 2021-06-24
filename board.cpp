@@ -430,7 +430,7 @@ bool board::legal_SEF(int startRow, int startColumn, int Dir)
 	}
 	if (Dir == S)
 	{
-		if (startRow < 5) {
+		if (startRow < 6) {
 				destRow++;
 				state = isFull(destRow, destColumn);
 				if (state == true) {
@@ -461,16 +461,18 @@ bool board::legal_SEF(int startRow, int startColumn, int Dir)
 
 	if (Dir == E)
 	{
-		destColumn++;
-		state = isFull(destRow, destColumn);
-		if (state == true) {
+		if(startColumn < 6){
 			destColumn++;
 			state = isFull(destRow, destColumn);
-			if (state == false) {
-				return true;
-			}
+			if (state == true) {
+				destColumn++;
+				state = isFull(destRow, destColumn);
+				if (state == false) {
+					return true;
+				}
 		}
 
+		}
 	}
 	return false;
 }
@@ -579,7 +581,7 @@ bool board::legal_move(int currentmove[], int startRow, int startColumn, int Dir
 
 	if (Dir == 3) //E
 	{
-		if (destColumn <6) {
+		if (destColumn < 6) {
             destColumn++;
             state = isFull(destRow, destColumn);
             if (state == true) {

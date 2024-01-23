@@ -237,7 +237,7 @@ bool board::guardRails(){
     m=bestmove[3];
     //check for horizontal movement
     if(i==k||j==m){
-		//check for even number of squares traversed, if mod 2 = zero, then move is probably legal, 
+		//check for even number of squares traversed, if mod 2 = zero, then move is probably legal,
 	    //player can still break game w illegal move, but player can flip the board in monopoly as well soooo....
         i=(abs(i-k))%2;
         j=(abs(j-m))%2;
@@ -276,7 +276,7 @@ void board::selection(int S) {
  ***ASSUMES SOME INTELLIGENCE ON PART OF USER***/
  /***ZERO PLAYER GAME COMPATIBLE***/
 void board::manualOverride() {
-	char remadd, ans;
+	char remadd, ans='n';
 			while (ans != 'y') {
             display();
 
@@ -762,6 +762,6 @@ int board::SEF(int playerColor) {
 
 		}
 	}
-	
+
     return (sumMoves+pb); //all the moves possible for AI less the total moves possible by the player and the piece balance
 }

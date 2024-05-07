@@ -1,5 +1,5 @@
 # Konane AI 
-# Made by Tafroze and Sam (Robert).
+# Made by Sam (Robert) and documented by Tafroze.
 A.I. that plays Konane at a high level of expertise (Codeblocks/MinGW seem to be required to make this work.  Bugs to fix... sigh)
 __________________________________________________________________________________________________________________________________
 Competition variation:

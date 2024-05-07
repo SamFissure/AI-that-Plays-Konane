@@ -8,12 +8,11 @@ We broke some OOP rules (some things made public, some global variables, only on
 
 For the tournament, the AI must move in 15 seconds or forfeit.  
 __________________________________________________________________________________________________________________________________
-This is now hobbyist & has moved beyond tournament play.
+This is now hobbyist (Robert's project) & has moved beyond tournament play.
 What that means for the code:
 This code will be refactored in the following ways
 1. it will become more OOP where possible, 
 some global constants MAY become class-member variables.  Other alterations will be made to improve modularity and user-friendliness.
 
 :::TODO:::
-FIX BIG O ISSUE.  It takes far too long to make a move early-game.
 Improve Parellel implementation.  While the game is thread-safe, some threads are not being utilized well.

@@ -1,6 +1,7 @@
 # Konane AI 
 # Made by Sam (Robert) and documented by Tafroze.
 A.I. that plays Konane at a high level of expertise
+Designed with speed in mind over intelligence
 __________________________________________________________________________________________________________________________________
 Competition variation:
 

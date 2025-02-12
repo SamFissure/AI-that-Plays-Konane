@@ -17,4 +17,4 @@ some global constants MAY become class-member variables.  Other alterations will
 
 :::TODO:::
 Improve Parellel implementation.  While the game is thread-safe, some threads are not being utilized well.
-Contributing
+## Contributing
